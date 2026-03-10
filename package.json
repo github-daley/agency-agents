@@ -53,9 +53,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/el-j/agency-agents.git"
+    "url": "https://github.com/msitarzewski/agency-agents.git"
   },
-  "homepage": "https://github.com/el-j/agency-agents#readme",
+  "homepage": "https://github.com/msitarzewski/agency-agents#readme",
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.0.0",

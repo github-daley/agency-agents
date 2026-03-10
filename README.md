@@ -111,7 +111,7 @@ jobs:
       # Single agent
       - name: Load Security Engineer agent
         id: agent
-        uses: el-j/agency-agents@main
+        uses: msitarzewski/agency-agents@main
         with:
           agent: security-engineer
 
@@ -123,7 +123,7 @@ jobs:
       # Swarm mode
       - name: Build a startup swarm
         id: swarm
-        uses: el-j/agency-agents@main
+        uses: msitarzewski/agency-agents@main
         with:
           agents: 'frontend-developer,backend-architect,growth-hacker'
           swarm_name: 'Startup MVP Team'
@@ -155,6 +155,21 @@ jobs:
 | `agent_name` | Resolved agent name (single-agent only) |
 | `agent_json` | Agent metadata JSON (single-agent only) |
 | `swarm_json` | Array of agent metadata JSON (swarm mode) |
+| `nexus_task_id` | nexus-orchestrator task ID (only set when `nexus_url` is provided) |
+
+**Nexus Orchestrator (optional)** — add `nexus_url` to route the agent task straight to a [nexus-orchestrator](https://github.com/el-j/nexus-orchestrator) daemon:
+
+```yaml
+- name: Load agent and submit to nexus-orchestrator
+  id: agent
+  uses: msitarzewski/agency-agents@main
+  with:
+    agent: backend-architect
+    nexus_url: 'http://localhost:9998/mcp'
+    nexus_project_path: ${{ github.workspace }}
+    nexus_target_file: 'src/server.ts'
+    nexus_request: 'Add rate-limiting middleware'
+```
 
 See the [Multi-Tool Integrations](#-multi-tool-integrations) section below for full details.
 

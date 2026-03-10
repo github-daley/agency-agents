@@ -42,6 +42,37 @@ inputs:
     required: false
     default: ''
 
+  nexus_url:
+    description: >
+      Optional URL of a nexus-orchestrator MCP endpoint
+      (e.g. "http://localhost:9998/mcp"). When provided, the resolved system
+      prompt is submitted as a task to nexus-orchestrator and the task ID is
+      exposed via the `nexus_task_id` output.
+    required: false
+    default: ''
+
+  nexus_project_path:
+    description: >
+      Absolute path to the project for the nexus-orchestrator task.
+      Only used when `nexus_url` is set.
+      Defaults to `$GITHUB_WORKSPACE` when not provided.
+    required: false
+    default: ''
+
+  nexus_target_file:
+    description: >
+      Relative path (within the project) of the primary file the
+      nexus-orchestrator task should operate on. Only used when `nexus_url` is set.
+    required: false
+    default: ''
+
+  nexus_request:
+    description: >
+      Optional task-specific request appended after the system prompt when
+      submitting to nexus-orchestrator. Only used when `nexus_url` is set.
+    required: false
+    default: ''
+
 outputs:
   system_prompt:
     description: 'The agent system prompt (Markdown). For swarms this is the full orchestrator prompt.'
@@ -59,6 +90,10 @@ outputs:
     description: 'Array of agent metadata objects as a JSON string (swarm mode).'
     value: ${{ steps.load.outputs.swarm_json }}
 
+  nexus_task_id:
+    description: 'Task ID returned by nexus-orchestrator (only set when `nexus_url` is provided).'
+    value: ${{ steps.load.outputs.nexus_task_id }}
+
 runs:
   using: 'composite'
   steps:
@@ -72,6 +107,10 @@ runs:
         AGENCY_SWARM_NAME: ${{ inputs.swarm_name }}
         AGENCY_MISSION: ${{ inputs.mission }}
         AGENCY_ACTION_PATH: ${{ github.action_path }}
+        AGENCY_NEXUS_URL: ${{ inputs.nexus_url }}
+        AGENCY_NEXUS_PROJECT_PATH: ${{ inputs.nexus_project_path }}
+        AGENCY_NEXUS_TARGET_FILE: ${{ inputs.nexus_target_file }}
+        AGENCY_NEXUS_REQUEST: ${{ inputs.nexus_request }}
       run: |
         // -----------------------------------------------------------------------
         // agency-agents GitHub Action — inline Node.js loader
@@ -199,8 +238,57 @@ runs:
         const category   = (process.env.AGENCY_CATEGORY || '').trim();
         const swarmName  = (process.env.AGENCY_SWARM_NAME || 'Agency Swarm').trim();
         const mission    = (process.env.AGENCY_MISSION   || '').trim();
+        const nexusUrl   = (process.env.AGENCY_NEXUS_URL || '').trim();
+        const nexusProjectPath = (process.env.AGENCY_NEXUS_PROJECT_PATH || process.env.GITHUB_WORKSPACE || process.cwd()).trim();
+        const nexusTargetFile  = (process.env.AGENCY_NEXUS_TARGET_FILE || '').trim();
+        const nexusRequest     = (process.env.AGENCY_NEXUS_REQUEST || '').trim();
 
         const all = loadAll(rootDir);
+
+        // ── nexus-orchestrator helper ─────────────────────────────────────────
+        async function submitToNexus(systemPrompt) {
+          if (!nexusUrl) return;
+          if (!nexusTargetFile) {
+            console.error('::warning::Agency Agents: nexus_url is set but nexus_target_file is empty. Provide nexus_target_file to specify which file the task operates on. Skipping nexus submission.');
+            return;
+          }
+          const instruction = nexusRequest
+            ? `${systemPrompt}\n\n---\n\n${nexusRequest}`
+            : systemPrompt;
+          const body = JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: { name: 'submit_task', arguments: {
+              projectPath: nexusProjectPath,
+              targetFile:  nexusTargetFile,
+              instruction,
+            }},
+            id: Date.now(),
+          });
+          try {
+            const res = await fetch(nexusUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body,
+            });
+            if (!res.ok) {
+              console.error(`::warning::Agency Agents: nexus-orchestrator responded with ${res.status} ${res.statusText}. Continuing without nexus.`);
+              return;
+            }
+            const json = await res.json();
+            if (json.error) {
+              console.error(`::warning::Agency Agents: nexus-orchestrator MCP error: ${json.error.message}. Continuing without nexus.`);
+              return;
+            }
+            const taskId = json.result?.id;
+            if (taskId) {
+              setOutput('nexus_task_id', taskId);
+              console.log(`🔗 Nexus task submitted: ${taskId}`);
+            }
+          } catch (err) {
+            console.error(`::warning::Agency Agents: could not reach nexus-orchestrator at "${nexusUrl}". Continuing without nexus.`);
+          }
+        }
 
         // ── single agent ──
         if (agentInput) {
@@ -215,6 +303,7 @@ runs:
           setOutput('agent_json',    JSON.stringify({ name: agent.name, slug: agent.slug, description: agent.description, color: agent.color, category: agent.category }));
           setOutput('swarm_json',    '[]');
           console.log(`✅ Loaded agent: ${agent.name} (${agent.category})`);
+          await submitToNexus(agent.systemPrompt);
           process.exit(0);
         }
 
@@ -248,3 +337,4 @@ runs:
         setOutput('agent_json',    '{}');
         setOutput('swarm_json',    JSON.stringify(swarmAgents.map(a => ({ name: a.name, slug: a.slug, description: a.description, color: a.color, category: a.category }))));
         console.log(`✅ Loaded swarm: ${swarmAgents.length} agents (${swarmName})`);
+        await submitToNexus(prompt);
