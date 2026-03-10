@@ -76,6 +76,50 @@ slugify() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//'
 }
 
+strip_wrapping_quotes() {
+  local value="$1"
+  value="${value#\"}"
+  value="${value%\"}"
+  printf '%s' "$value"
+}
+
+opencode_color_line() {
+  local color
+  color="$(strip_wrapping_quotes "$1")"
+
+  case "$color" in
+    '#'[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])
+      printf '%s' "color: \"$color\""
+      ;;
+    primary|secondary|accent|success|warning|error|info)
+      printf '%s' "color: $color"
+      ;;
+    red)            printf '%s' 'color: "#ef4444"' ;;
+    orange)         printf '%s' 'color: "#f97316"' ;;
+    amber)          printf '%s' 'color: "#f59e0b"' ;;
+    yellow)         printf '%s' 'color: "#eab308"' ;;
+    lime)           printf '%s' 'color: "#84cc16"' ;;
+    green)          printf '%s' 'color: "#22c55e"' ;;
+    teal)           printf '%s' 'color: "#14b8a6"' ;;
+    cyan)           printf '%s' 'color: "#06b6d4"' ;;
+    blue)           printf '%s' 'color: "#3b82f6"' ;;
+    indigo)         printf '%s' 'color: "#6366f1"' ;;
+    violet)         printf '%s' 'color: "#8b5cf6"' ;;
+    purple)         printf '%s' 'color: "#a855f7"' ;;
+    fuchsia)        printf '%s' 'color: "#d946ef"' ;;
+    pink)           printf '%s' 'color: "#ec4899"' ;;
+    rose)           printf '%s' 'color: "#f43f5e"' ;;
+    gray)           printf '%s' 'color: "#6b7280"' ;;
+    gold)           printf '%s' 'color: "#d4af37"' ;;
+    neon-cyan)      printf '%s' 'color: "#00f5ff"' ;;
+    neon-green)     printf '%s' 'color: "#39ff14"' ;;
+    metallic-blue)  printf '%s' 'color: "#3f6fff"' ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 # --- Per-tool converters ---
 
 convert_antigravity() {
@@ -129,27 +173,34 @@ HEREDOC
 
 convert_opencode() {
   local file="$1"
-  local name description color slug outfile body
+  local name description color slug outfile body color_line
 
   name="$(get_field "name" "$file")"
   description="$(get_field "description" "$file")"
   color="$(get_field "color" "$file")"
   slug="$(slugify "$name")"
   body="$(get_body "$file")"
+  color_line="$(opencode_color_line "$color" || true)"
 
   outfile="$OUT_DIR/opencode/agent/${slug}.md"
   mkdir -p "$OUT_DIR/opencode/agent"
 
-  # OpenCode agent format: same as the source format (.md with frontmatter).
-  # color field is supported. No conversion needed beyond directory placement.
-  cat > "$outfile" <<HEREDOC
+  # OpenCode accepts semantic color tokens and #RRGGBB values. Normalize the
+  # source color when needed so existing agent files stay compatible.
+  {
+    cat <<HEREDOC
 ---
 name: ${name}
 description: ${description}
-color: ${color}
+HEREDOC
+    if [[ -n "$color_line" ]]; then
+      printf '%s\n' "$color_line"
+    fi
+    cat <<HEREDOC
 ---
 ${body}
 HEREDOC
+  } > "$outfile"
 }
 
 convert_cursor() {

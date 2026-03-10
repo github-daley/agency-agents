@@ -31,15 +31,19 @@ You can also select agents from the OpenCode UI's agent picker.
 
 ## Agent Format
 
-OpenCode agents use the same frontmatter as Claude Code:
+OpenCode agents use the same frontmatter shape as Claude Code, but the `color`
+value must be a supported semantic token or a `#RRGGBB` hex value:
 
 ```yaml
 ---
 name: Frontend Developer
 description: Expert frontend developer specializing in modern web technologies...
-color: cyan
+color: "#06b6d4"
 ---
 ```
+
+The converter normalizes common named colors from the source agent files so the
+generated OpenCode agents stay valid.
 
 ## Project vs Global
 
