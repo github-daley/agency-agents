@@ -99,7 +99,7 @@ The TEL token sits at the center of all of it.
 Native gas token of Telcoin Network.
 Powers the Internet of Money.
 
-Currently ~$0.0026 market cap ~$241M
+Currently ~$0.0026 market cap ~~$254M
 
 Before mainnet.
 Before bank is fully operational.
@@ -113,7 +113,7 @@ Before 5B users.
 The mainnet launches in 2026.
 
 GSMA operators activating as validators across every continent.
-Telcoin Wallet V4 live with eUSD.
+Telcoin Wallet V5 live with eUSD.
 Governance transitioning to the community.
 
 The Internet of Money isn't a concept anymore. It's a scheduled deployment.

@@ -88,7 +88,7 @@
    Powers the Internet of Money.
 
    Currently: ~$0.0026
-   Market cap: ~$241M
+   Market cap: ~~$254M
 
    Before mainnet launch.
    Before bank operational.
@@ -97,7 +97,7 @@
 7/ The mainnet launches in 2026.
 
    GSMA operators activating as validators across every continent.
-   Telcoin Wallet V4 live with eUSD integration.
+   Telcoin Wallet V5 live with eUSD integration.
    Miner Council elections transitioning governance to the community.
 
    The infrastructure is being built. Right now.
@@ -119,7 +119,7 @@
 
 ```
 1/ We're at the @DCBlockchain Summit 2026.
-   Bronze sponsor. In the room where it happens.
+   Silver Sponsor. In the room where it happens.
 
    Here's what the smartest people in regulated crypto
    are actually talking about. 👇
@@ -364,7 +364,7 @@
 
    This is the Internet of Money thesis.
 
-   Mainnet 2026.
+   Mainnet launch — see roadmap.telcoin.network.
 
    Are you ready?
    $TEL 🌐

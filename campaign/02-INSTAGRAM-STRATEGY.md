@@ -234,7 +234,7 @@ MUSIC: Inspiring, global, minimal
 
 ### REEL 4 — "Mainnet Is Coming" (Week 7, 30 seconds)
 **Concept**: Hype/countdown style, fast-cut
-**Hook first frame**: "Mainnet 2026. Here's what that means."
+**Hook first frame**: "Mainnet launch — see roadmap.telcoin.network. Here's what that means."
 
 ```
 VISUAL: Fast cuts — network nodes lighting up on a world map

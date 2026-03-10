@@ -29,11 +29,11 @@
 | eUSD launch | Dec 2025 | First bank-issued on-chain stablecoin |
 | TEL listed on Kraken | Jan 2026 | Global reach: 13M users, 190+ countries |
 | Adiri Testnet | Dec 2025 | Public testnet for mainnet prep |
-| DC Blockchain Summit Sponsorship | Mar 17–18, 2026 | Bronze sponsor, institutional visibility |
+| DC Blockchain Summit Sponsorship | Mar 17–18, 2026 | Silver Sponsor, institutional visibility |
 | Y3 900M TEL allocation proposal | Jan 2026 | Community governance in action |
 
 ### Token & Market Status
-- **TEL price**: ~$0.0026 | **Market cap**: ~$241M | **Rank**: #152
+- **TEL price**: ~$0.0026 | **Market cap**: ~~$254M | **Rank**: #152
 - **Circulating supply**: 95B TEL | **Max supply**: 100B TEL
 - **Twitter**: 111K followers | **Sentiment**: 4.2/5 (40.87% bullish, 14.18% bearish)
 - **Exchanges**: Bybit (primary), Kraken, MEXC, Coinbase, Binance
@@ -81,7 +81,7 @@
 **Target**: Socially conscious investors, emerging market audiences, fintech community
 
 ### Pillar 4: "The Mainnet is Coming" (FOMO & Momentum)
-> *"GSMA mobile operators across every continent. One blockchain. One standard. One token. Mainnet 2026."*
+> *"GSMA mobile operators across every continent. One blockchain. One standard. One token. Mainnet launch — see roadmap.telcoin.network."*
 
 **Target**: Crypto traders, existing TEL holders, speculative community
 
@@ -137,7 +137,7 @@
 - [ ] AMA confirmation from Telcoin Association leadership
 
 ### Analytics Reporter needs:
-- [x] Baseline metrics (111K Twitter, ~$241M mcap, 4.2/5 sentiment)
+- [x] Baseline metrics (111K Twitter, ~~$254M mcap, 4.2/5 sentiment)
 - [x] KPI targets defined above
 - [ ] Access to social analytics tools (Sprout Social / Buffer / native analytics)
 - [ ] Weekly reporting cadence confirmation

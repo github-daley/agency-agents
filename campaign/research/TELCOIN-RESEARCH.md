@@ -1,0 +1,286 @@
+# Telcoin Association & Network — Campaign Research
+## Last updated: March 10, 2026
+## Sources: telcoin.org, telcoin.network, forum.telcoin.org, CoinMarketCap, Business Wire, Governor of Nebraska, GitHub, web search
+
+> ⚠️ **MAINNET INFO**: roadmap.telcoin.network returns 403 to automated tools.
+> All mainnet/roadmap content MUST be verified by a human at https://roadmap.telcoin.network
+> before publishing. Placeholder sections marked with [VERIFY].
+
+---
+
+## 1. TELCOIN ASSOCIATION
+
+### Legal Structure
+- **Type**: Swiss Verein (non-profit association)
+- **Domicile**: Canton Ticino, City of Lugano, Switzerland
+- **Swiss Verein notes**: No capital contribution required; members don't share profits/liabilities; governance defined by internal statutes; tax-exempt under certain conditions
+- **Website**: telcoin.org
+- **X/Twitter**: @telcoinTAO
+- **Forum**: forum.telcoin.org
+- **GitHub**: github.com/telcoin-association (23 repositories)
+
+### Mission & Vision
+- **Mission**: Represent interests of GSMA Mobile Networks and other stakeholders; use blockchain technology to globally support financial inclusion and prosperity
+- **Vision**: Decentralized platform bringing blockchain-powered mobile financial services to telecoms and subscribers globally — designed to reach every mobile phone user in the world
+
+### Leadership (Publicly Known)
+| Name | Title |
+|---|---|
+| Paul Neuner | Co-Founder and CEO |
+| Parker Spann | EVP Business Development & Strategy; Founder of Telcoin Association; Executive Director of TAO |
+| Tim Mahota | General Counsel and Chief Compliance Officer |
+| Richard Schendel | VP Banking Operations |
+| Rajesh Sabari | Chief Commercial Officer, CFA |
+
+**Advisory Members:**
+- Michimasa Naka — 28 years banking experience, CEO Boardwalk Capital
+- Toby Hoenisch — Co-founder & CEO TenX
+- Matthew McGuire — Former COO Bank of America Merrill Lynch Japan & RBS Japan
+
+### Governance Structure
+- **Model**: Polycentric, democratic self-governance (based on Elinor Ostrom's 8 Design Principles for common-pool resources)
+- **Four Miner Groups** (equal authority): Validators, Liquidity Miners, Developers, Stakers
+- **Miner Assembly**: Collective body with ultimate power over platform governance
+- **Council structure**: Constitutional-level governance with specialized councils
+- **TELIPs**: Telcoin Improvement Proposals — community-submitted governance proposals
+- **Forum**: forum.telcoin.org — active governance discussions, elections, TGIPs
+
+### Recent Governance Activity
+- **Y3 TEL Allocation (TELIP)**: 900 million TEL proposed for Year 3 (January 2026) — purpose: platform development, miner incentives, mainnet launch support
+- Miner Council elections underway as of Q1 2026
+
+---
+
+## 2. TELCOIN NETWORK
+
+### Architecture
+- **Type**: EVM-compatible Layer 1 public blockchain
+- **Consensus**: Proof-of-Stake using Narwhal and Bullshark consensus protocol (local DAG-based)
+- **Validators**: ONLY GSMA full-member MNOs can validate blocks and earn rewards
+- **Native gas token**: TEL
+- **Chain ID**: 2017
+- **RPC**: https://rpc.telcoin.network
+- **Block explorer (testnet)**: scan.telcoin.network
+- **Block explorer (alt)**: telscan.io
+- **Main site**: telcoin.network
+
+### GSMA Validator Model
+- Exclusive right for GSMA Operator Member MNOs to run transaction nodes and earn network fees
+- MNOs must meet basic criteria set by Telcoin Association AND stake TEL
+- Each new MNO validator = new distribution channel to that telecom's subscriber base
+- Creates direct economic alignment: more usage → more fees → MNOs promote Telcoin services
+
+### Adiri Testnet
+- **Status**: Live as of December 2025
+- **Structure**: Three sequential stabilization phases
+  - **Phase 1** (Completed): Functional, secure foundation — finalized components for open Cantina security competition; deployed TAO-controlled validator nodes
+  - **Phase 2** (In Progress): Addressing audit issues; strengthening production readiness — some milestones complete, some in progress, some queued
+  - **Phase 3**: (Pending Phase 2 completion)
+- **Security audits**: Each audit cycle ~2–3 months (scheduling + review + remediation + retest)
+- First major audit cycle nearing completion; second cycle preparations ongoing
+
+### Mainnet Roadmap
+> ⚠️ VERIFY ALL DETAILS AT https://roadmap.telcoin.network — page returns 403 to automated tools
+
+**What is confirmed from official sources:**
+- Roadmap is publicly live at roadmap.telcoin.network
+- Roadmap covers: Adiri phase milestones, security & audits progress, path to enterprise-ready mainnet
+- Launch approach: **milestone-based, not calendar-based** — security over speed
+- Telcoin Association posted: "Clarity on what's done, what's next, and the final steps before Mainnet launch"
+
+**What is NOT confirmed (do not publish until verified at roadmap.telcoin.network):**
+- Specific mainnet launch date or quarter
+- Which specific MNOs will be initial validators
+- Exact Phase 3 milestones
+
+**Do NOT use**: Any third-party date estimates (Q3 2026 etc.) — use only official roadmap language
+
+---
+
+## 3. PRODUCTS
+
+### Telcoin Wallet
+- **Domain**: telco.in (wallet app) — distinct from telcoin.org (association) and telcoin.network (blockchain)
+- **Version**: V5 expected early 2026 (not V4)
+- **Platforms**: iOS and Android
+- **Networks supported**: Polygon, Base (migrating to Telcoin Network at mainnet)
+- **Features**: Hold Digital Cash stablecoins, swap tokens, send remittances to mobile money platforms
+
+**Active Remittance Corridors (16 countries, 23+ platforms):**
+| Country | Platform(s) |
+|---|---|
+| Bangladesh | BKash |
+| Ethiopia | HelloCash |
+| Fiji | Digicel |
+| Ghana | MTN Money |
+| Guatemala | Tigo Money |
+| Indonesia | Dana, GoPay, LinkAja, OVO |
+| Kenya | Equitel Money |
+| Sri Lanka | Ez Cash, mCash |
+| Malawi | Airtel Money |
+| Nepal | eSewa |
+| Pakistan | Easy Paisa, Jazz Cash |
+| Philippines | Coins |
+| El Salvador | Tigo Money |
+| Tonga | Digicel |
+| Uganda | Airtel Money, MTN Money |
+| Samoa | Digicel |
+
+- **Fee target**: 2% or less total (vs. 6–10% Western Union/MoneyGram)
+
+### TELx — DeFi Platform
+- **Networks**: Polygon PoS and Base
+- **Pools**: Balancer V2 (6 active markets), Uniswap V4 (migrated Nov 5, 2025)
+- **Yield**: Liquidity miners earn exchange fees + TEL rewards + governance rights
+- **Analytics**: telx.network/pools
+- **Staking**: Weekly rewards every Wednesday 00:00 UTC; 3.2 billion TEL distributed weekly based on activity
+- **TAN Council Safe**: 194.44 million TEL held
+
+### eUSD Stablecoin
+- **Launch date**: December 26, 2025
+- **Issuer**: Telcoin Digital Asset Bank (state-chartered U.S. bank)
+- **Backing**: 1:1 backed by USD + short-term U.S. Treasury assets
+- **Audits**: Monthly attestations from external auditor
+- **Initial mint**: $10 million eUSD
+- **Networks**: Ethereum and Polygon (Telcoin Network at mainnet)
+- **Access**: Telcoin Wallet V5 (early 2026 onboarding)
+- **Distinction**: FIRST bank-issued on-chain stablecoin — issued under U.S. banking law, not by a private company
+
+### Digital Cash Stablecoin Suite
+| Token | Currency | Status |
+|---|---|---|
+| eUSD | US Dollar | Live — Ethereum + Polygon |
+| eGBP | British Pound | Live — Polygon |
+| eJPY | Japanese Yen | Live — Polygon |
+| eSGD | Singapore Dollar | Live — Polygon |
+| eZAR | South African Rand | Live — Polygon |
+| eEUR | Euro | Planned — MiCA compliant (e-Money Institution) |
+
+- **Mercado Bitcoin**: Listed eUSD and eGBP
+
+### Telcoin Digital Asset Bank
+- **Charter type**: Digital Asset Depository Institution (DADI)
+- **Charter date**: November 12, 2025
+- **Signed by**: Nebraska Governor Jim Pillen
+- **Regulator**: Nebraska Department of Banking and Finance
+- **Legal framework**: Nebraska Financial Innovation Act + GENIUS Act guidelines
+- **Authorized to**: Accept crypto deposits, provide crypto loans, connect to Federal Reserve payment rails, connect customers to DeFi
+- **Capitalization**: $25 million secured
+- **Operations began**: December 26, 2025 (eUSD launch)
+- **Personal/business accounts**: Launch Q1 2026
+- **Historic significance**: First-in-nation U.S. digital asset bank charter
+
+---
+
+## 4. TEL TOKEN
+
+### Contract Addresses
+| Network | Address |
+|---|---|
+| Ethereum | `0x467bccd9d29f223bce8043b84e8c8b282827790f` |
+| Polygon (Proxy) | `0xdf7837de1f2fa4631d716cf2502f8b230f1dcc32` |
+| Polygon (Implementation) | `0x805b70339183f9a98cc7fcb35fcbeb5ac10713ea` |
+| Telcoin Network | Native gas token (address TBD — mainnet not live) |
+
+### Tokenomics
+- **Max supply**: 100 billion TEL (hard cap)
+- **Circulating supply**: ~96.074 billion TEL (96% of max)
+- **Issued**: 2017
+
+### Market Data (March 2026)
+- **Price**: ~$0.002642 USD
+- **24h volume**: ~$1.35M USD
+- **Market cap**: ~$253.8M USD
+- **CMC rank**: ~#122
+
+### Exchange Listings
+- Kraken (listed January 26, 2026 — 13M+ users, 190+ countries)
+- Bybit (primary volume, TEL/USDT)
+- MEXC
+- Coinbase
+- Binance
+- Balancer V2 (Polygon — DEX)
+
+### Staking
+- Deposit TEL via TAN staking contracts in Telcoin Wallet
+- Weekly reward distribution: every Wednesday 00:00 UTC
+- Weekly pool: 3.2 billion TEL distributed to all stakers based on activity
+- Reward types: Referral fees (real-time) + TEL issuance (adoption-based)
+
+---
+
+## 5. COMMUNITY & SOCIAL
+
+### @telcoinTAO (X/Twitter)
+- Primary official account for Telcoin Association
+- Silver Sponsor of DC Blockchain Summit (2025 confirmed; 2026 TBC — verify)
+- Content: Roadmap updates, governance announcements, network milestones
+
+### Reddit: r/telcoin
+- Community exists; historically positive sentiment
+- Activity: Variable — not high-volume
+- Topics: Technology, partnerships, roadmap, competition
+
+### Forum: forum.telcoin.org
+- Active governance discussions (TELIPs, council elections, TGIPs)
+- Key recent threads: Y3 TEL allocation TELIP, Miner Council elections
+
+### Key Community Figures
+- **Hodler Vaughn**: Telcoin Magazine contributor, governance analysis
+- **Parker Spann**: Executive Director, governance innovation
+- **TelcoinFan** (@TelcoinFan): Active community voice on X
+- **Telcoin_Juggler** (@Telcoin_Juggler): Active community voice on X
+
+---
+
+## 6. COMPETITIVE LANDSCAPE
+
+### Direct Remittance Crypto Competitors
+| Project | Model | Telcoin Differentiator |
+|---|---|---|
+| XRP/Ripple | Bank-to-bank B2B, 300+ institution partners | Mobile-first, retail/consumer, MNO validators |
+| Stellar (XLM) | Non-profit, emerging markets, anchor model | MNO validators = real infrastructure, not just anchors |
+| Celo | Ethereum L2, phone number identity, mobile-first | L1 with bank charter, GSMA-native, regulated |
+| Traditional SWIFT | Correspondent banking, 3–5 day settlement | Near-instant, near-zero fees |
+
+### Traditional Remittance Fees (Benchmark)
+- Western Union: 3–8% typical
+- MoneyGram: 4–6%
+- Bank wire: flat $25–$45
+- World Bank global average: ~6.3%
+- **Telcoin target**: ≤2%
+
+### Telcoin's Moat
+1. Only blockchain with GSMA MNO validators (licensed, accountable, globally distributed)
+2. Only regulated U.S. digital asset bank with DeFi connection authority
+3. Only bank-issued on-chain stablecoin (eUSD)
+4. 16-country live remittance network with 23+ mobile money integrations
+
+---
+
+## 7. RECENT NEWS TIMELINE
+
+| Date | Event |
+|---|---|
+| Nov 12, 2025 | Nebraska Governor signs first-in-nation Digital Asset Depository Institution charter |
+| Dec 2025 | Adiri Testnet launches |
+| Dec 26, 2025 | Telcoin Digital Asset Bank operations begin; eUSD minted ($10M initial) |
+| Jan 26, 2026 | TEL listed on Kraken |
+| Mar 2026 | DC Blockchain Summit (verify sponsorship tier for 2026 at telcoin.org) |
+| Q1 2026 | Telcoin Wallet V5 launch (per research) |
+| Q1 2026 | Personal/business bank accounts open |
+| Q1 2026 | Miner Council elections ongoing |
+| TBD | Mainnet launch — see roadmap.telcoin.network |
+
+---
+
+## 8. THINGS TO VERIFY BEFORE PUBLISHING
+
+- [ ] Mainnet timeline/phases — visit roadmap.telcoin.network in browser
+- [ ] 2026 DC Blockchain Summit sponsorship tier (Silver vs Bronze)
+- [ ] Wallet V5 exact launch date
+- [ ] Which specific MNOs have committed as mainnet validators
+- [ ] Current TVL in TELx (check telx.network/pools)
+- [ ] Current follower count on @telcoinTAO
+- [ ] Any new corridor/partnership announcements since Jan 2026
+- [ ] Personal/business bank account launch status

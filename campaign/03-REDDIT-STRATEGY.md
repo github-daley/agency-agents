@@ -220,7 +220,7 @@ That's Telcoin Network. Here's the technical and philosophical breakdown:
 - EVM-compatible (full Ethereum tooling works, Solidity contracts deploy)
 - Consensus: Only GSMA-member mobile network operators (MNOs) can validate
 - Gas token: TEL
-- Currently: Adiri Testnet live, Mainnet expected 2026
+- Currently: Adiri Testnet live, Mainnet per roadmap.telcoin.network
 
 **Why MNO validators specifically**:
 
@@ -348,7 +348,7 @@ Proposed topics based on what I see most discussed here:
 - EVM compatibility: which Ethereum tools/dApps are planned for deployment?
 
 **Product**:
-- Telcoin Wallet V4: what's new?
+- Telcoin Wallet V5: what's new?
 - eUSD: regulatory framework, backing mechanics, audit plans
 - TELx: yield sustainability, risk model
 - Remittance corridors: timeline for expansion
