@@ -46,14 +46,14 @@ linkedin_config:
   newsletter: false                              # set to true + name when launched
 weekly_output_target:
   pillar_posts: 1
-  platform_packages: 4    # blog + LinkedIn + Twitter + Instagram
+  platform_packages: 4    # LinkedIn + Twitter + Instagram + Reddit (blog is the pillar, not a "package")
 constraints: >
   Never position as "cheap" — frame as high-ROI and "95% less than a full
   team." Do not use competitor names negatively. Avoid AI hype language
   (disruptive, revolutionary, game-changing). Every claim should be
   supportable with a specific number or case study. Reference the 47 startup
   case study and 14-day guarantee where relevant.
-review_contact: "Dylan Angloher — [FILL IN: email or Slack handle]"
+review_contact: "Dylan Angloher — dylan@orchidea.digital"
 ```
 
 ---
