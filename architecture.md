@@ -408,18 +408,288 @@ TypeScript strict mode
 JSDoc for public functions
 Functional components
 Custom hooks for logic
-Future Considerations
-Real Data Integration
+---
 
-Solana wallet adapter
-WebSocket for real-time data
-Backend API integration
-Testing Expansion
+# 🏗️ LiquidityHawk Architecture
+System Overview
+LiquidityHawk is a modular Python-based trading bot designed for real-time market analysis and signal generation. The architecture follows a layered approach with clear separation of concerns.
 
-Component tests with RTL
-E2E tests with Playwright
-Performance
+┌─────────────────────────────────────────────────────────────────┐
+│                        USER INTERFACE                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │   CLI (main) │  │  Dashboard   │  │   Telegram Alerts    │  │
+│  │   main.py    │  │ dashboard.py │  │ telegram_bot.py      │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     MONITORING LAYER                            │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                   TradingMonitor                          │  │
+│  │  - Alert conditions (Oversold, Overbought, Extreme L/S)  │  │
+│  │  - Liquidity hunt detection                               │  │
+│  │  - Callback system for notifications                      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      STRATEGY LAYER                             │
+│  ┌────────────────────┐  ┌────────────────────────────────┐    │
+│  │  ArbitrageStrategy │  │       CopyTrader               │    │
+│  │  - Polymarket      │  │  - Wallet monitoring           │    │
+│  │  - YES/NO spreads  │  │  - Trade replication           │    │
+│  └────────────────────┘  └────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       DATA LAYER                                │
+│  ┌────────────────────┐  ┌────────────────────────────────┐    │
+│  │  MarketCollector   │  │      ExchangeMonitor           │    │
+│  │  - Polymarket API  │  │  - BinanceTracker              │    │
+│  │  - Order books     │  │  - BybitTracker                │    │
+│  │  - Arbitrage scan  │  │  - TechnicalIndicators         │    │
+│  └────────────────────┘  └────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    EXECUTION LAYER                              │
+│  ┌────────────────────┐  ┌────────────────────────────────┐    │
+│  │    OrderManager    │  │       RiskManager              │    │
+│  │  - Limit orders    │  │  - Position sizing             │    │
+│  │  - Market orders   │  │  - Daily loss limits           │    │
+│  │  - Order tracking  │  │  - Emergency stop              │    │
+│  └────────────────────┘  └────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   EXTERNAL SERVICES                             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────────────┐    │
+│  │ Binance  │ │  Bybit   │ │Polymarket│ │ Polygon (Web3)  │    │
+│  │ Futures  │ │   API    │ │   CLOB   │ │   Blockchain    │    │
+│  └──────────┘ └──────────┘ └──────────┘ └─────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+Module Details
+1. Configuration (src/config.py)
+Central configuration management using dataclasses and environment variables.
 
-Virtual scrolling for tables
-Service worker caching
-Last updated: January 29, 2026
+@dataclass
+class BotConfig:
+    polymarket: PolymarketConfig
+    wallet: WalletConfig
+    risk: RiskConfig
+    copy_trade: CopyTradeConfig
+    mode: str = "paper"
+Environment Variables:
+
+Variable	Description	Required
+POLYMARKET_API_KEY	Polymarket API key	For Polymarket features
+POLYMARKET_API_SECRET	API secret	For Polymarket features
+POLYGON_RPC_URL	Alchemy/Infura RPC	For wallet tracking
+TELEGRAM_BOT_TOKEN	Telegram bot token	For alerts
+TELEGRAM_CHAT_ID	Your Telegram chat ID	For alerts
+MAX_POSITION_SIZE_USD	Max single position	Yes
+DAILY_LOSS_LIMIT_USD	Daily loss limit	Yes
+2. Data Layer
+ExchangeTracker (src/data/exchange_tracker.py)
+Fetches real-time data from exchanges.
+
+class BinanceTracker:
+    async def get_long_short_ratio(symbol, period) -> LongShortRatio
+    async def get_top_trader_ratio(symbol, period) -> LongShortRatio
+    async def get_funding_rate(symbol) -> FundingRate
+    async def get_klines(symbol, interval, limit) -> list[OHLCV]
+
+class TechnicalIndicators:
+    @staticmethod
+    def williams_r(candles, period=14) -> WilliamsR
+    @staticmethod
+    def rsi(candles, period=14) -> float
+Data Structures:
+
+@dataclass
+class LongShortRatio:
+    symbol: str
+    long_ratio: float   # Percentage (0-100)
+    short_ratio: float  # Percentage (0-100)
+    timestamp: datetime
+
+@dataclass
+class WilliamsR:
+    value: float        # -100 to 0
+    is_overbought: bool # value > -20
+    is_oversold: bool   # value < -80
+MarketCollector (src/data/market_collector.py)
+Polymarket-specific data collection.
+
+class MarketDataCollector:
+    async def get_markets(active_only=True) -> list[Market]
+    async def get_order_book(token_id) -> OrderBook
+    async def find_arbitrage_opportunities(min_profit=1.0) -> list[dict]
+3. Monitoring Layer
+TradingMonitor (src/monitoring/trading_monitor.py)
+Central monitoring with alert conditions.
+
+class TradingMonitor:
+    conditions: list[AlertCondition]
+    
+    async def start(symbols, interval, print_updates)
+    async def check_and_alert(analysis)
+Alert Conditions:
+
+Condition	Trigger
+OversoldCondition	Williams %R < -80
+OverboughtCondition	Williams %R > -20
+ExtremeLongShortCondition	L/S > 65%
+ExtremeFundingCondition	Funding > 0.05%
+LiquidityHuntCondition	Combined signals
+TelegramAlertBot (src/monitoring/telegram_bot.py)
+Telegram notification system.
+
+class TelegramAlertBot:
+    async def send_message(text, parse_mode="Markdown")
+    async def send_signal(symbol, direction, entry_price, reason)
+    async def send_long_short_update(symbol, long_ratio, short_ratio, williams_r)
+    async def send_liquidity_alert(symbol, level, liquidation_amount)
+4. Strategy Layer
+ArbitrageStrategy (src/strategy/arbitrage.py)
+Polymarket arbitrage detection and execution.
+
+class ArbitrageStrategy:
+    async def scan_opportunities(min_profit_percent) -> list[ArbitrageOpportunity]
+    async def execute_arbitrage(opportunity, investment_usd, dry_run)
+    async def run_continuous(investment, min_profit, interval, dry_run)
+Arbitrage Logic:
+
+If YES_ask + NO_ask < $1.00:
+    profit = $1.00 - (YES_ask + NO_ask)
+    Buy both YES and NO tokens
+    Guaranteed profit when market resolves
+CopyTrader (src/strategy/copy_trader.py)
+Wallet copy trading.
+
+class CopyTrader:
+    async def start(target_wallet, live_mode)
+    async def copy_trade(trade, dry_run) -> CopyTradeResult
+    
+    # Filters
+    def set_filters(min_size, max_size, allowed_tokens)
+5. Execution Layer
+OrderManager (src/execution/order_manager.py)
+Order placement and management.
+
+class OrderManager:
+    async def create_limit_order(token_id, side, price, size, order_type)
+    async def create_market_order(token_id, side, size)
+    async def cancel_order(order_id)
+    async def get_open_orders()
+Order Types:
+
+GTC - Good Till Cancelled
+FOK - Fill Or Kill
+GTD - Good Till Date
+RiskManager (src/risk/risk_manager.py)
+Risk controls and safety limits.
+
+class RiskManager:
+    def check_trade_allowed(size, price, side) -> (bool, reason)
+    def record_trade(token_id, side, price, size, pnl)
+    def emergency_stop(reason)
+    def get_stats() -> dict
+Risk Features:
+
+Daily P&L tracking
+Maximum position size
+Automatic stop on loss limit
+Trade count limits
+6. User Interfaces
+CLI (main.py)
+Click-based command-line interface.
+
+# Commands
+python main.py analyze --symbol BTCUSDT
+python main.py longshort --symbol ETHUSDT --period 5m
+python main.py monitor --symbols BTCUSDT,ETHUSDT --interval 60
+python main.py scan --min-profit 0.5
+python main.py arbitrage --investment 10 --mode paper
+python main.py copy --wallet 0x... --scale 0.1
+python main.py track --wallet 0x... --limit 20
+python main.py status
+Web Dashboard (dashboard.py)
+FastAPI-based web interface.
+
+# Endpoints
+GET /                        # Dashboard HTML
+GET /api/analysis/{symbol}   # JSON analysis data
+Features:
+
+Real-time price display
+Visual L/S ratio bar
+Indicator cards (W%R, RSI, Funding)
+Auto-refresh (30 seconds)
+Trading signal detection
+Data Flow
+Signal Detection Flow
+1. ExchangeMonitor.get_full_analysis(symbol)
+   ├── BinanceTracker.get_long_short_ratio()
+   ├── BinanceTracker.get_top_trader_ratio()
+   ├── BinanceTracker.get_funding_rate()
+   ├── BinanceTracker.get_klines()
+   └── TechnicalIndicators.williams_r()
+
+2. TradingMonitor.check_and_alert(analysis)
+   ├── OversoldCondition.check()
+   ├── OverboughtCondition.check()
+   ├── ExtremeLongShortCondition.check()
+   └── LiquidityHuntCondition.check()
+
+3. If condition triggered:
+   ├── Print to console
+   └── TelegramAlertBot.send_message()
+Arbitrage Flow
+1. MarketDataCollector.get_markets()
+
+2. For each market:
+   ├── get_order_book(YES_token)
+   ├── get_order_book(NO_token)
+   └── Calculate: YES_ask + NO_ask < $1.00?
+
+3. If profitable:
+   ├── RiskManager.check_trade_allowed()
+   ├── OrderManager.create_limit_order(YES)
+   └── OrderManager.create_limit_order(NO)
+
+4. Track and report
+Technology Stack
+Component	Technology
+Language	Python 3.10+
+Web Framework	FastAPI + Uvicorn
+HTTP Client	httpx (async)
+Blockchain	web3.py
+CLI	Click + Rich
+Config	python-dotenv
+API Rate Limits
+Service	Limit	Notes
+Binance	1200/min	Public endpoints
+Bybit	120/min	Per endpoint
+Polymarket	100/min	Authenticated
+Polygonscan	5/sec	Free tier
+Telegram	30/sec	Per chat
+Security Considerations
+Never commit .env - Contains secrets
+Use paper mode first - Test thoroughly
+Set loss limits - Protect capital
+Secure VPS - Use SSH keys, firewall
+Monitor logs - Watch for errors
+Future Enhancements
+ WebSocket connections for real-time data
+ Multiple exchange support (OKX, Kraken)
+ Machine learning signal enhancement
+ Portfolio tracking and analytics
+ Mobile app integration
+ Backtesting framework
+Architecture Version: 1.0.0
