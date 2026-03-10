@@ -39,6 +39,26 @@ These examples answer the question: *"What does it actually look like when the f
 
 **Key takeaway:** All 8 agents ran in parallel and produced coherent, cross-referencing plans without coordination overhead. The output demonstrates the agency's ability to go from "find an opportunity" to "here's the full blueprint" in a single session.
 
+### [workflow-content-engine.md](./workflow-content-engine.md)
+
+**What:** A repeatable weekly multi-platform content production pipeline using 8 marketing agents.
+
+**The scenario:** A B2B SaaS brand needs a sustainable content engine — from keyword research to cross-platform publishing to analytics-driven iteration. The full cycle runs in about a week and gets smarter every cycle.
+
+**Agents used:**
+| Agent | Role |
+|-------|------|
+| SEO Specialist | Keyword research, topic validation, on-page optimization |
+| Growth Hacker | Audience intelligence, distribution analysis, end-of-cycle analytics |
+| Content Creator | Editorial calendar, long-form pillar content |
+| Twitter Engager | Thread and standalone tweet packages |
+| Instagram Curator | Carousel and Reel concepts |
+| TikTok Strategist | Short-form video scripts and hooks |
+| Reddit Community Builder | Community distribution and engagement |
+| Social Media Strategist | Cross-platform publishing calendar |
+
+**Key takeaway:** Research runs in parallel, platform adaptation runs in parallel, and the analytics review at the end feeds directly back into the next cycle — compounding the engine's effectiveness over time.
+
 ## Adding New Examples
 
 If you run an interesting multi-agent exercise, consider adding it here. Good examples show:
