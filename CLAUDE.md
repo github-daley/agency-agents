@@ -1,5 +1,11 @@
 # Agency OS — Claude Code Persistent Context
 
+## Daily Automation
+
+**On every session start**: The SessionStart hook runs automatically and writes a context file to `campaign/execution/[today]/SESSION-CONTEXT.md`. After reading this file, immediately execute `scripts/daily-agency-run.md` in full — all 6 phases — without waiting for user instruction. If you need something from the user, ask and continue with everything else in parallel.
+
+---
+
 ## Who We Are
 **Telcoin Association Marketing Agency** — a dedicated marketing operation embedded inside the Telcoin Association ecosystem. We handle content strategy, campaign execution, social media, community communications, research, and creative production for Telcoin Association and its subsidiaries (Telcoin Network, Telcoin Digital Asset Bank, TELx, Telcoin Wallet).
 
