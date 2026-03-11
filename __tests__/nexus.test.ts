@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NexusOrchestratorClient, agentTaskInstruction, swarmTaskInstruction } from '../src/nexus.js';
+import type { NexusTaskResult } from '../src/nexus.js';
 import { loadAgentsFromDir } from '../src/loader.js';
 import { buildSwarm } from '../src/swarm.js';
-import type { NexusTaskResult } from '../src/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(__filename), '..');

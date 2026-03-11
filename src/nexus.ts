@@ -25,7 +25,51 @@
  * ```
  */
 
-import type { Agent, Swarm, NexusTask, NexusTaskResult, NexusOrchestratorOptions } from './types.js';
+import type { Agent, Swarm } from './types.js';
+
+// ---------------------------------------------------------------------------
+// Nexus Orchestrator types (isolated to this module — not part of core API)
+// ---------------------------------------------------------------------------
+
+/**
+ * A task to be submitted to the nexus-orchestrator daemon.
+ * Mirrors the `submit_task` MCP tool arguments.
+ */
+export interface NexusTask {
+  /** Absolute path to the project the task operates on. */
+  projectPath: string;
+  /** Relative path (within `projectPath`) of the primary file to edit. */
+  targetFile: string;
+  /**
+   * The instruction for the LLM — typically an agent's system prompt
+   * combined with any additional context or request.
+   */
+  instruction: string;
+}
+
+/** Status of a task returned by the nexus-orchestrator daemon. */
+export type NexusTaskStatus = 'queued' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+
+/** Result returned after submitting or polling a nexus-orchestrator task. */
+export interface NexusTaskResult {
+  /** Unique task identifier assigned by the daemon. */
+  id: string;
+  /** Current lifecycle status of the task. */
+  status: NexusTaskStatus;
+  /** LLM output once the task reaches `completed` status. */
+  output?: string;
+  /** Error message when status is `failed`. */
+  error?: string;
+}
+
+/** Options for {@link NexusOrchestratorClient}. */
+export interface NexusOrchestratorOptions {
+  /**
+   * Base URL of the nexus-orchestrator MCP server.
+   * @default "http://localhost:9998/mcp"
+   */
+  mcpUrl?: string;
+}
 
 // ---------------------------------------------------------------------------
 // Internal MCP JSON-RPC helpers

@@ -8,6 +8,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./nexus": {
+      "types": "./dist/nexus.d.ts",
+      "import": "./dist/nexus.js",
+      "require": "./dist/nexus.cjs"
     }
   },
   "main": "./dist/index.cjs",

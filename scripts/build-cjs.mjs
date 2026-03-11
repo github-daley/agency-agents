@@ -27,8 +27,16 @@ module.exports = require('./index.js');
 `,
 );
 
+// Write dist/nexus.cjs  →  wraps dist/nexus.js for CJS consumers
+writeFileSync(
+  join(distDir, 'nexus.cjs'),
+  `'use strict';
+module.exports = require('./nexus.js');
+`,
+);
+
 // Write dist/package.json so Node correctly treats dist/ files as ESM
 const distPkg = join(distDir, 'package.json');
 writeFileSync(distPkg, JSON.stringify({ type: 'module' }, null, 2) + '\n');
 
-console.log('[build-cjs] Wrote dist/index.cjs and dist/package.json');
+console.log('[build-cjs] Wrote dist/index.cjs, dist/nexus.cjs and dist/package.json');

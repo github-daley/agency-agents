@@ -43,7 +43,7 @@ import {
   NexusOrchestratorClient,
   agentTaskInstruction,
   swarmTaskInstruction,
-} from 'agency-agents';
+} from 'agency-agents/nexus';
 
 const nexus = new NexusOrchestratorClient();
 // Optional: use a remote daemon
@@ -91,6 +91,8 @@ console.log('Swarm task:', swarmTask.id);
 | `NexusTask` | Task shape accepted by `submitTask` |
 | `NexusTaskResult` | Result / status shape returned by `getTask` |
 | `NexusOrchestratorOptions` | Options for `NexusOrchestratorClient` |
+
+All of the above are exported from the separate `agency-agents/nexus` subpath and are **not** included in the main `agency-agents` bundle.
 
 #### `NexusOrchestratorClient` methods
 
@@ -163,6 +165,8 @@ Or use `npx agency-agents get backend-architect --prompt` to retrieve the system
 ## Health Check
 
 ```typescript
+import { NexusOrchestratorClient } from 'agency-agents/nexus';
+
 const nexus = new NexusOrchestratorClient();
 if (await nexus.checkHealth()) {
   console.log('nexus-orchestrator is running');

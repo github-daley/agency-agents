@@ -18,10 +18,6 @@ export type {
   AgentFrontmatter,
   Swarm,
   SwarmOptions,
-  NexusTask,
-  NexusTaskResult,
-  NexusTaskStatus,
-  NexusOrchestratorOptions,
 } from './types.js';
 
 // Agent loading
@@ -29,9 +25,6 @@ export { loadAgents, getAgent, listAgents, listCategories } from './registry.js'
 
 // Swarm orchestration
 export { buildSwarm } from './swarm.js';
-
-// Nexus Orchestrator integration (optional)
-export { NexusOrchestratorClient, agentTaskInstruction, swarmTaskInstruction } from './nexus.js';
 
 // Lower-level utilities (for advanced consumers)
 export {
