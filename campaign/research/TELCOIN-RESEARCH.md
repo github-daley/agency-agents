@@ -2,9 +2,8 @@
 ## Last updated: March 10, 2026
 ## Sources: telcoin.org, telcoin.network, forum.telcoin.org, CoinMarketCap, Business Wire, Governor of Nebraska, GitHub, web search
 
-> ⚠️ **MAINNET INFO**: roadmap.telcoin.network returns 403 to automated tools.
-> All mainnet/roadmap content MUST be verified by a human at https://roadmap.telcoin.network
-> before publishing. Placeholder sections marked with [VERIFY].
+> Roadmap data sourced directly from roadmap.telcoin.network (screenshots, March 10, 2026).
+> Developer Notes last updated: **February 19, 2026** per roadmap page.
 
 ---
 
@@ -70,30 +69,78 @@
 - Each new MNO validator = new distribution channel to that telecom's subscriber base
 - Creates direct economic alignment: more usage → more fees → MNOs promote Telcoin services
 
-### Adiri Testnet
-- **Status**: Live as of December 2025
-- **Structure**: Three sequential stabilization phases
-  - **Phase 1** (Completed): Functional, secure foundation — finalized components for open Cantina security competition; deployed TAO-controlled validator nodes
-  - **Phase 2** (In Progress): Addressing audit issues; strengthening production readiness — some milestones complete, some in progress, some queued
-  - **Phase 3**: (Pending Phase 2 completion)
-- **Security audits**: Each audit cycle ~2–3 months (scheduling + review + remediation + retest)
-- First major audit cycle nearing completion; second cycle preparations ongoing
+### Adiri Testnet — Status: ACTIVE
+Source: roadmap.telcoin.network (March 10, 2026 screenshots)
 
-### Mainnet Roadmap
-> ⚠️ VERIFY ALL DETAILS AT https://roadmap.telcoin.network — page returns 403 to automated tools
+> "Preparing the Adiri public testnet so partners and MNO validators can exercise the network in a live setting."
 
-**What is confirmed from official sources:**
-- Roadmap is publicly live at roadmap.telcoin.network
-- Roadmap covers: Adiri phase milestones, security & audits progress, path to enterprise-ready mainnet
-- Launch approach: **milestone-based, not calendar-based** — security over speed
-- Telcoin Association posted: "Clarity on what's done, what's next, and the final steps before Mainnet launch"
+#### Phase 1 — ALL COMPLETED ✓
+- Pre Cantina competition
+- Initial spin up of TAO controlled validator nodes
+- Launch block explorer
+- Demo PoC
+- Feature complete
+- 4-week security assessment
 
-**What is NOT confirmed (do not publish until verified at roadmap.telcoin.network):**
-- Specific mainnet launch date or quarter
-- Which specific MNOs will be initial validators
-- Exact Phase 3 milestones
+#### Phase 2 — IN PROGRESS
+**Completed ✓**
+- Patch security findings
+- Enhance test coverage
+- Production harden database read/write strategy
+- Improve documentation
+- MiCA whitepaper
+- Improve async logging for all nodes in the network
+- Updates to support open-source contributions
+- Parallelize testing infrastructure for faster, more reliable testing
 
-**Do NOT use**: Any third-party date estimates (Q3 2026 etc.) — use only official roadmap language
+**In Progress ⚡ (active as of Feb 19, 2026)**
+- Production harden p2p networking
+- Production harden syncing strategy
+- Integrate with bridge partner
+- Stress test deployed network in preparation for public release
+- Confirming availability of specialist researchers with security partners
+- Support p2p streaming for bulk data transfer
+- Streamline database infrastructure for production
+- Custom TN RPC endpoints
+- Harden epoch boundary records for secure syncing
+- Better tools for validators to sync, stake, and activate
+- Relaunch network
+
+**Queued ⏳**
+- Support multiple workers for parallel fee markets
+- Deploy new faucet service
+
+#### Phase 3
+- **In Progress ⚡**: Integrate with LayerZero
+- **Queued ⏳**: Decentralize network (onboard MNO Validators)
+
+---
+
+### Mainnet Release — Status: UPCOMING
+Source: roadmap.telcoin.network
+
+> "Mainnet launch once Adiri is stable and the final audits and security competition are complete."
+
+**No calendar date given — milestone-based launch.**
+
+#### Mainnet Milestones — All Queued ⏳
+- Launch Mainnet
+- Cryptography security assessment
+- P2P Network security assessment
+- Smart contract security assessments
+- Execution layer security assessment
+- State synchronization security assessment
+- Patch security findings
+
+---
+
+### Developer Notes — Updated February 19, 2026
+Source: roadmap.telcoin.network "Latest Updates" section
+
+- **Support P2P Streaming for Bulk Data Transfer** — Implement peer-to-peer streaming mechanisms to enable efficient bulk data transfer between nodes, improving sync performance and reducing reliance on centralized distribution.
+- **Streamline Database Infrastructure for Production** — Refactor and optimise database architecture to ensure production-grade performance, reliability, and scalability across validators and observers.
+- **Custom TN RPC Endpoints** — Develop dedicated Telcoin Network RPC endpoints tailored to ecosystem use cases, improving performance, flexibility, and infrastructure control.
+- **Harden Epoch Boundary Records for Secure Syncing** — Improve validation and integrity checks around epoch boundaries for secure syncing. *(description truncated in screenshot)*
 
 ---
 
@@ -276,11 +323,12 @@
 
 ## 8. THINGS TO VERIFY BEFORE PUBLISHING
 
-- [ ] Mainnet timeline/phases — visit roadmap.telcoin.network in browser
-- [ ] 2026 DC Blockchain Summit sponsorship tier (Silver vs Bronze)
+- [x] Mainnet timeline/phases — confirmed from roadmap.telcoin.network (March 10, 2026)
+- [ ] 2026 DC Blockchain Summit sponsorship tier (Silver confirmed for 2025; confirm 2026)
 - [ ] Wallet V5 exact launch date
 - [ ] Which specific MNOs have committed as mainnet validators
 - [ ] Current TVL in TELx (check telx.network/pools)
 - [ ] Current follower count on @telcoinTAO
 - [ ] Any new corridor/partnership announcements since Jan 2026
 - [ ] Personal/business bank account launch status
+- [ ] "Integrate with bridge partner" identity — which bridge (LayerZero already separate; this may be a cross-chain bridge for assets)
