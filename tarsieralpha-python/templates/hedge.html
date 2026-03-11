@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}Hedge Mode — Tarsier Alpha{% endblock %}
+
+{% block extra_head %}
+<style>
+.hedge-basket-table td, .hedge-basket-table th { vertical-align: middle; }
+.hedge-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 600; }
+.hedge-badge-margin_alert { background: rgba(255,77,106,0.12); color: var(--red); border: 1px solid rgba(255,77,106,0.25); }
+.hedge-badge-theta_burn   { background: rgba(240,180,41,0.12);  color: var(--gold); border: 1px solid rgba(240,180,41,0.25); }
+.hedge-badge-hedge_position { background: rgba(77,159,255,0.12); color: var(--blue); border: 1px solid rgba(77,159,255,0.25); }
+.hedge-badge-estimate_only  { background: rgba(139,148,158,0.12); color: #8b949e; border: 1px solid rgba(139,148,158,0.2); }
+.coverage-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.06); }
+.coverage-bar .fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green), var(--teal)); transition: width 0.8s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="d-flex align-items-center gap-3">
+      <span style="font-size: 2rem;">🛡</span>
+      <div>
+        <h2 class="mb-0">Hedge Mode</h2>
+        <span class="text-secondary-custom">Generate a PUT basket to hedge your business exposure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Risk Disclosure ── #}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card" style="border-color: rgba(255,77,106,0.25); background: rgba(255,77,106,0.03);">
+      <div class="card-body py-2">
+        <small class="text-secondary-custom">
+          <i class="bi bi-exclamation-triangle text-warning me-1"></i>
+          <strong style="color: var(--text-secondary);">Paper hedge only — no real trades placed.</strong>
+          PUT options carry significant risk including total loss of premium.
+          This is educational and not financial advice.
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Input Form ── #}
+<div class="row mb-4">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header py-3">
+        <h5 class="mb-0"><i class="bi bi-sliders me-2"></i>Configure Hedge</h5>
+      </div>
+      <div class="card-body">
+        <form id="hedgeForm">
+          <div class="mb-3">
+            <label class="form-label">Business Industry</label>
+            <select class="form-select" name="industry" id="hedgeIndustry" required>
+              <option value="">— Select your industry —</option>
+              {% for ind in industries %}
+              <option value="{{ ind.key }}">{{ ind.label }}</option>
+              {% endfor %}
+            </select>
+            <small class="text-secondary-custom">We'll find correlated public companies to hedge against</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Exposure Amount ($)</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" name="exposureUsd" id="hedgeExposure"
+                     placeholder="e.g. 500000" min="1000" required>
+            </div>
+            <small class="text-secondary-custom">Your annual cost or revenue at risk from this industry (e.g. diesel spend)</small>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Risk Tolerance</label>
+            <div class="d-flex gap-2">
+              {% for key, label, desc in [('low','Low','10% of exposure'), ('med','Medium','20% of exposure'), ('high','High','35% of exposure')] %}
+              <div class="flex-fill">
+                <input type="radio" class="btn-check" name="riskTolerance" id="rt_{{ key }}"
+                       value="{{ key }}" {% if key == 'med' %}checked{% endif %}>
+                <label class="btn btn-outline-secondary w-100 text-center py-2" for="rt_{{ key }}">
+                  <div style="font-weight:700; font-size:0.85rem;">{{ label }}</div>
+                  <div style="font-size:0.7rem; opacity:0.7;">{{ desc }}</div>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" id="hedgeSubmitBtn">
+            <i class="bi bi-search"></i> Generate Hedge Basket
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ── Results ── #}
+  <div class="col-lg-7">
+    <div id="hedgeResults" style="display:none;">
+      <div class="card mb-3">
+        <div class="card-body py-3" id="hedgeSummary">
+          {# Filled dynamically #}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-table me-2"></i>Basket</h5>
+          <button class="btn btn-sm btn-outline-danger" id="enterBasketBtn" onclick="enterHedgeBasket()">
+            <i class="bi bi-clipboard-plus"></i> Paper Hedge All
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 trade-table hedge-basket-table">
+              <thead>
+                <tr>
+                  <th>Ticker</th>
+                  <th>Setup</th>
+                  <th>Score</th>
+                  <th>Strike</th>
+                  <th>Premium</th>
+                  <th>Contracts</th>
+                  <th>Cost</th>
+                  <th>Gain @-5%</th>
+                  <th>Δ Info</th>
+                  <th>Badges</th>
+                </tr>
+              </thead>
+              <tbody id="basketBody">
+              </tbody>
+              <tfoot id="basketFoot">
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="hedgePlaceholder" class="text-center py-5 text-secondary-custom">
+      <i class="bi bi-shield" style="font-size: 3rem; opacity: 0.3;"></i>
+      <p class="mt-3">Configure your hedge parameters and click Generate</p>
+    </div>
+    <div id="hedgeLoading" style="display:none;" class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-3 text-secondary-custom">Scoring correlated tickers...</p>
+    </div>
+  </div>
+</div>
+
+{# ── How It Works ── #}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body py-3">
+        <h6 class="mb-3"><i class="bi bi-info-circle text-blue me-1"></i>How Hedge Mode Works</h6>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              <strong style="color: var(--teal);">1. Industry Mapping</strong><br>
+              We identify publicly-traded companies whose stock price is highly correlated
+              with costs in your industry (e.g., diesel = XPO, JBHT, ODFL).
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              <strong style="color: var(--gold);">2. Short Scoring</strong><br>
+              Each correlated ticker is scored for short setup quality (RSI, BB, volume fade).
+              Only candidates scoring ≥70 make it into the basket.
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              <strong style="color: var(--blue);">3. PUT Sizing</strong><br>
+              Position size = hedge target ÷ basket size.
+              Contracts = (per-position USD / 100) / put premium.
+              Estimated gain uses delta × 5% price drop.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let lastBasketData = null;
+
+document.getElementById('hedgeForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const industry = document.getElementById('hedgeIndustry').value;
+  const exposureUsd = parseFloat(document.getElementById('hedgeExposure').value);
+  const riskTolerance = document.querySelector('input[name="riskTolerance"]:checked').value;
+
+  document.getElementById('hedgePlaceholder').style.display = 'none';
+  document.getElementById('hedgeResults').style.display = 'none';
+  document.getElementById('hedgeLoading').style.display = 'block';
+  document.getElementById('hedgeSubmitBtn').disabled = true;
+
+  try {
+    const resp = await fetch('/api/hedge/suggest', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({industry, exposureUsd, riskTolerance})
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Request failed');
+    lastBasketData = data;
+    renderBasket(data);
+  } catch (err) {
+    alert('Error: ' + err.message);
+    document.getElementById('hedgePlaceholder').style.display = 'block';
+  } finally {
+    document.getElementById('hedgeLoading').style.display = 'none';
+    document.getElementById('hedgeSubmitBtn').disabled = false;
+  }
+});
+
+function renderBasket(data) {
+  const summary = document.getElementById('hedgeSummary');
+  const coveragePct = Math.min(100, data.coverage_ratio || 0);
+  summary.innerHTML = `
+    <div class="row g-3 mb-2">
+      <div class="col-6 col-md-3 text-center">
+        <div class="text-secondary-custom" style="font-size:.72rem;">EXPOSURE</div>
+        <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--text-primary);">$${fmt(data.exposure_usd)}</div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="text-secondary-custom" style="font-size:.72rem;">HEDGE TARGET</div>
+        <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--gold);">$${fmt(data.hedge_target)}</div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="text-secondary-custom" style="font-size:.72rem;">BASKET COST</div>
+        <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--red);">$${fmt(data.total_cost)}</div>
+      </div>
+      <div class="col-6 col-md-3 text-center">
+        <div class="text-secondary-custom" style="font-size:.72rem;">GAIN @-5% DROP</div>
+        <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--green);">+$${fmt(data.expected_gain_5pct_drop)}</div>
+      </div>
+    </div>
+    <div class="mt-1">
+      <small class="text-secondary-custom">Coverage ratio: ${data.coverage_ratio}%</small>
+      <div class="coverage-bar mt-1"><div class="fill" style="width:${coveragePct}%"></div></div>
+    </div>
+  `;
+
+  const tbody = document.getElementById('basketBody');
+  tbody.innerHTML = '';
+  for (const pos of data.basket) {
+    const badgesHtml = (pos.badges || []).map(b =>
+      `<span class="hedge-badge hedge-badge-${b}">${b.replace('_', ' ')}</span>`
+    ).join(' ');
+
+    tbody.innerHTML += `
+      <tr>
+        <td><strong>${pos.ticker}</strong></td>
+        <td><small style="color:var(--red);font-size:.72rem;">${pos.setup_type || 'short'}</small></td>
+        <td><span style="color:var(--gold);font-weight:700;">${pos.score}</span></td>
+        <td>$${pos.strike}</td>
+        <td>$${(pos.premium||0).toFixed(2)}</td>
+        <td>${pos.contracts}</td>
+        <td>$${fmt(pos.position_cost)}</td>
+        <td style="color:var(--green);">+$${fmt(pos.gain_at_5pct_drop)}</td>
+        <td><small class="text-secondary-custom">${pos.hedge_hint||''}</small></td>
+        <td>${badgesHtml}</td>
+      </tr>
+    `;
+  }
+
+  const tfoot = document.getElementById('basketFoot');
+  tfoot.innerHTML = `
+    <tr style="border-top:1px solid rgba(255,255,255,0.1);">
+      <td colspan="6"><strong>Total</strong></td>
+      <td><strong>$${fmt(data.total_cost)}</strong></td>
+      <td style="color:var(--green);"><strong>+$${fmt(data.expected_gain_5pct_drop)}</strong></td>
+      <td colspan="2"></td>
+    </tr>
+  `;
+
+  document.getElementById('hedgeResults').style.display = 'block';
+}
+
+async function enterHedgeBasket() {
+  if (!lastBasketData) return;
+  const btn = document.getElementById('enterBasketBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Entering...';
+
+  const industry = document.getElementById('hedgeIndustry').value;
+  const exposureUsd = parseFloat(document.getElementById('hedgeExposure').value);
+  const riskTolerance = document.querySelector('input[name="riskTolerance"]:checked').value;
+
+  try {
+    const resp = await fetch('/api/hedge/enter', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({industry, exposureUsd, riskTolerance})
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Entry failed');
+    btn.innerHTML = `<i class="bi bi-check-circle"></i> Entered ${data.trades_created} paper trades`;
+    btn.style.background = 'rgba(45,222,152,0.15)';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'rgba(45,222,152,0.3)';
+    setTimeout(() => window.location.href = '/paper-trades', 2000);
+  } catch (err) {
+    alert('Error: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-clipboard-plus"></i> Paper Hedge All';
+  }
+}
+
+function fmt(n) {
+  if (!n && n !== 0) return '—';
+  return parseFloat(n).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+</script>
+{% endblock %}

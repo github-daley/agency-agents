@@ -1,0 +1,207 @@
+{#
+  shorts_tab.html
+  ──────────────
+  The Shorts tab content block for dashboard.html.
+
+  HOW TO ADD to dashboard.html:
+  ─────────────────────────────
+  1. Add the Shorts nav tab pill after the Longs filter section.
+     Find the filter <form> block and wrap the whole page in Bootstrap tabs:
+
+     Replace:
+       <div class="row mb-3"> ... filter form ... </div>
+       <div class="row"> ... Top Candidates card ... </div>
+       ... Watchlist ...
+
+     With:
+       <!-- Nav tabs -->
+       <ul class="nav nav-tabs mb-3" id="scannerTabs" role="tablist">
+         <li class="nav-item" role="presentation">
+           <button class="nav-link active" id="longs-tab"
+                   data-bs-toggle="tab" data-bs-target="#longs-pane"
+                   type="button" role="tab">
+             📈 Longs
+           </button>
+         </li>
+         {% if current_user.is_admin or current_user.shorts_enabled %}
+         <li class="nav-item" role="presentation">
+           <button class="nav-link" id="shorts-tab"
+                   data-bs-toggle="tab" data-bs-target="#shorts-pane"
+                   type="button" role="tab"
+                   onclick="loadShorts()">
+             📉 Shorts <span class="badge bg-danger ms-1" style="font-size:.6rem;">BETA</span>
+           </button>
+         </li>
+         {% endif %}
+         {% if current_user.is_admin %}
+         <li class="nav-item" role="presentation">
+           <button class="nav-link" id="hedge-tab"
+                   data-bs-toggle="tab" data-bs-target="#hedge-pane"
+                   type="button" role="tab">
+             🛡 Hedge
+           </button>
+         </li>
+         {% endif %}
+       </ul>
+
+       <div class="tab-content">
+         <div class="tab-pane fade show active" id="longs-pane" role="tabpanel">
+           <!-- existing longs content: filter form + top candidates + watchlist -->
+         </div>
+         {% if current_user.is_admin or current_user.shorts_enabled %}
+         <div class="tab-pane fade" id="shorts-pane" role="tabpanel">
+           {% include 'partials/shorts_tab.html' %}
+         </div>
+         {% endif %}
+         {% if current_user.is_admin %}
+         <div class="tab-pane fade" id="hedge-pane" role="tabpanel">
+           <div class="text-center py-4">
+             <a href="/hedge" class="btn btn-outline-light">
+               <i class="bi bi-shield me-1"></i> Open Hedge Mode
+             </a>
+           </div>
+         </div>
+         {% endif %}
+       </div>
+
+  2. Pass `shorts_enabled=current_user.shorts_enabled` in the dashboard() route.
+#}
+
+{# ── Shorts Beta Banner ── #}
+{% include 'partials/shorts_beta_banner.html' %}
+
+{# ── Shorts Candidate Table ── #}
+<div id="shortsContent">
+  <div id="shortsLoading" class="text-center py-5">
+    <div class="spinner-border text-danger"></div>
+    <p class="mt-2 text-secondary-custom">Loading short candidates...</p>
+  </div>
+  <div id="shortsCandidatesWrap" style="display:none;">
+    <div class="card">
+      <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0" style="color: var(--red);">
+          <i class="bi bi-graph-down-arrow me-2"></i>Short Candidates
+          <small class="text-secondary-custom ms-2">(Score 80+)</small>
+        </h5>
+        <span id="shortsCount" class="badge" style="background: rgba(255,77,106,0.15); color: var(--red);">0 found</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 trade-table">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Setup</th>
+                <th>Score</th>
+                <th class="col-hide-mobile">Entry</th>
+                <th class="col-hide-mobile">Target</th>
+                <th class="col-hide-mobile">Strike</th>
+                <th class="col-hide-mobile">DTE</th>
+                <th class="col-hide-mobile">Delta</th>
+                <th class="col-hide-mobile">Leverage</th>
+                <th>Badges</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="shortsTableBody">
+              {# filled by loadShorts() JS #}
+            </tbody>
+          </table>
+        </div>
+        <div id="shortsEmpty" class="text-center py-5" style="display:none;">
+          <i class="bi bi-bar-chart-line" style="font-size:2.5rem; opacity:0.3;"></i>
+          <p class="mt-2 text-secondary-custom">No short candidates found at this threshold.</p>
+          <p class="text-secondary-custom" style="font-size:0.8rem;">
+            The scanner runs daily. Short setups require RSI ≥ 75 or gap-up reversals with score ≥ 80.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="shortsError" class="alert alert-danger mt-3" style="display:none;"></div>
+</div>
+
+<script>
+let shortsLoaded = false;
+
+function loadShorts() {
+  if (shortsLoaded) return;
+  shortsLoaded = true;
+
+  fetch('/api/shorts/candidates?minScore=80')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('shortsLoading').style.display = 'none';
+      document.getElementById('shortsCandidatesWrap').style.display = 'block';
+
+      const total = data.total || 0;
+      document.getElementById('shortsCount').textContent = total + ' found';
+
+      const tbody = document.getElementById('shortsTableBody');
+      const candidates = data.candidates || [];
+
+      if (candidates.length === 0) {
+        document.getElementById('shortsEmpty').style.display = 'block';
+        return;
+      }
+
+      const setupLabels = {
+        gap_fill_short: 'Gap Fade',
+        overbought_short: 'Overbought',
+        catalyst_short: 'Cat Short',
+        hedge: 'Hedge',
+      };
+
+      tbody.innerHTML = candidates.map(c => {
+        const opt = c.option || {};
+        const badges = (c.badges || []).map(b => {
+          const colors = {
+            theta_burn:   'rgba(240,180,41,0.12); color: var(--gold)',
+            margin_alert: 'rgba(255,77,106,0.12); color: var(--red)',
+            hedge_position: 'rgba(77,159,255,0.12); color: var(--blue)',
+          };
+          const style = colors[b] || 'rgba(139,148,158,0.1); color: #8b949e';
+          return `<span class="strategy-badge" style="background:${style}; border:1px solid rgba(255,255,255,0.1);">${b.replace('_',' ')}</span>`;
+        }).join('');
+
+        return `
+          <tr class="clickable-row" data-href="/candidate/${c.id}"
+              style="border-left: 2px solid rgba(255,77,106,0.3);">
+            <td>
+              <a href="/candidate/${c.id}" class="text-decoration-none">
+                <span class="ticker-name">${c.ticker}</span>
+              </a>
+              <br><span class="company-name">${(c.company||'').substring(0,25)}</span>
+            </td>
+            <td><span class="strategy-badge strategy-badge-gap_fill"
+                      style="background:rgba(255,77,106,0.12);color:var(--red);border-color:rgba(255,77,106,0.25);">
+                  ${setupLabels[c.setupType] || c.setupType}
+                </span></td>
+            <td><span style="color:var(--red);font-weight:700;">${c.score}</span><small class="text-secondary-custom">/100</small></td>
+            <td class="col-hide-mobile">$${(c.entryPrice||0).toFixed(2)}</td>
+            <td class="col-hide-mobile" style="color:var(--green);">$${(c.targetPrice||0).toFixed(2)}</td>
+            <td class="col-hide-mobile">${opt.strike ? '$'+opt.strike : '—'}</td>
+            <td class="col-hide-mobile">${opt.dte || '—'}</td>
+            <td class="col-hide-mobile" style="color:var(--red);">${opt.delta ? opt.delta.toFixed(2) : '—'}</td>
+            <td class="col-hide-mobile">${c.leverage ? c.leverage+'x' : '—'}</td>
+            <td>${badges}</td>
+            <td><a href="/candidate/${c.id}" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-eye"></i></a></td>
+          </tr>
+          ${c.riskNote ? `
+          <tr style="border-left: 2px solid rgba(255,77,106,0.2); background: rgba(255,77,106,0.02);">
+            <td colspan="11" style="padding: 4px 12px 8px; font-size:0.72rem; color:#8b949e;">
+              ⚠️ ${c.riskNote}
+            </td>
+          </tr>` : ''}
+        `;
+      }).join('');
+    })
+    .catch(err => {
+      document.getElementById('shortsLoading').style.display = 'none';
+      const errEl = document.getElementById('shortsError');
+      errEl.textContent = 'Error loading short candidates: ' + err.message;
+      errEl.style.display = 'block';
+    });
+}
+</script>

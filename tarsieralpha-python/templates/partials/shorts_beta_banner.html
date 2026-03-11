@@ -1,0 +1,86 @@
+{#
+  shorts_beta_banner.html
+  ──────────────────────
+  Admin-gated opt-in banner shown at top of Shorts tab.
+  Include at top of the shorts content area:
+
+      {% include 'partials/shorts_beta_banner.html' %}
+
+  Prerequisites:
+    - current_user.is_admin must be True (route gating)
+    - Pass `shorts_enabled=current_user.shorts_enabled` to the template
+#}
+
+<div class="shorts-beta-banner mb-4" id="shortsBetaBanner">
+  <div class="card" style="border: 1px solid rgba(255,77,106,0.30); background: rgba(255,77,106,0.04);">
+    <div class="card-body py-3">
+      <div class="d-flex align-items-start gap-3">
+        <span style="font-size: 1.6rem; flex-shrink: 0;">📉</span>
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <h6 class="mb-0" style="color: var(--red, #ff4d6a); font-weight: 700;">
+              Shorts Scanner — Admin Preview
+            </h6>
+            <span class="badge" style="background: rgba(255,77,106,0.15); color: var(--red, #ff4d6a); font-size: 0.65rem; border: 1px solid rgba(255,77,106,0.3);">
+              BETA
+            </span>
+          </div>
+          <p class="mb-2" style="font-size: 0.82rem; color: var(--text-muted, #7F8899); line-height: 1.5;">
+            Short candidates use PUT options to profit when stocks decline.
+            <strong style="color: var(--text-secondary, #C9CDD4);">These setups carry higher risk than longs</strong>
+            — theta decay is aggressive, and adverse moves can result in 100% option loss.
+            All entries are paper-only with the <span class="badge" style="background:rgba(155,109,255,0.15); color: var(--purple, #9b6dff); font-size: 0.65rem;">margin_alert</span> badge.
+          </p>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span style="font-size: 0.78rem; color: var(--text-muted, #7F8899);">
+              <i class="bi bi-shield-check"></i> Min score: 80/100 &nbsp;|&nbsp;
+              <i class="bi bi-clock"></i> Beta min-score threshold is higher than longs (62) &nbsp;|&nbsp;
+              <i class="bi bi-file-text"></i> Paper only — no real trades
+            </span>
+          </div>
+        </div>
+        <div class="flex-shrink-0">
+          {% if not shorts_enabled %}
+          <button class="btn btn-sm"
+                  style="background: rgba(255,77,106,0.15); color: var(--red, #ff4d6a); border: 1px solid rgba(255,77,106,0.3);"
+                  onclick="enableShorts(this)">
+            <i class="bi bi-unlock"></i> Enable Shorts (Beta)
+          </button>
+          {% else %}
+          <span class="badge" style="background: rgba(45,222,152,0.12); color: var(--green, #2dde98); border: 1px solid rgba(45,222,152,0.25); padding: 6px 12px;">
+            <i class="bi bi-check-circle"></i> Active
+          </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function enableShorts(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Enabling...';
+  fetch('/admin/shorts/toggle', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({enabled: true})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      btn.closest('.shorts-beta-banner').innerHTML =
+        '<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle"></i> Shorts enabled — refresh to see candidates</div>';
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Enable Shorts (Beta)';
+      alert('Error: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.textContent = 'Enable Shorts (Beta)';
+  });
+}
+</script>
