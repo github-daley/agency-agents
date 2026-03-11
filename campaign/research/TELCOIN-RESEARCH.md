@@ -96,7 +96,7 @@ Source: roadmap.telcoin.network (March 10, 2026 screenshots)
 **In Progress ⚡ (active as of Feb 19, 2026)**
 - Production harden p2p networking
 - Production harden syncing strategy
-- Integrate with bridge partner (Axelar ITS — confirmed via tn-contracts repo)
+- Integrate with bridge partner (partner TBD — Axelar no longer active, see council call recaps)
 - Stress test deployed network in preparation for public release
 - Confirming availability of specialist researchers with security partners
 - Support p2p streaming for bulk data transfer
@@ -331,4 +331,4 @@ Source: roadmap.telcoin.network "Latest Updates" section
 - [ ] Current follower count on @telcoinTAO
 - [ ] Any new corridor/partnership announcements since Jan 2026
 - [ ] Personal/business bank account launch status
-- [x] Bridge partner = **Axelar** (Interchain Token Service / ITS) — integrated at protocol level via `InterchainTEL` precompile in tn-contracts repo. Inbound: native TEL minted when TEL locked/burned on remote chain. Outbound: TEL → double-wrapped iTEL for bridging. Supported remote chains: Ethereum Sepolia, Optimism-Sepolia (testnet); mainnet TBD.
+- [ ] Bridge partner — Axelar no longer active; confirm current partner from council call recaps
