@@ -40,17 +40,17 @@ Restart Claude after installing to load the new plugins.
 
 ## Available Plugins
 
-| Plugin | Agents |
-|--------|--------|
-| `agency-design` | Brand Guardian, UI Designer, UX Architect, UX Researcher, Visual Storyteller, Image Prompt Engineer, Whimsy Injector |
-| `agency-engineering` | Frontend Developer, Backend Architect, AI Engineer, DevOps Automator, Mobile App Builder, Rapid Prototyper, Security Engineer, Senior Developer |
-| `agency-marketing` | Content Creator, Growth Hacker, Social Media Strategist, App Store Optimizer, Reddit Community Builder, Instagram Curator, TikTok Strategist, Twitter Engager, WeChat, Xiaohongshu, Zhihu |
-| `agency-product` | Feedback Synthesizer, Sprint Prioritizer, Trend Researcher |
-| `agency-project-management` | Project Shepherd, Studio Producer, Studio Operations, Experiment Tracker, Senior Project Manager |
-| `agency-support` | Support Responder, Analytics Reporter, Finance Tracker, Executive Summary Generator, Infrastructure Maintainer, Legal Compliance Checker |
-| `agency-testing` | Reality Checker, Accessibility Auditor, API Tester, Performance Benchmarker, Tool Evaluator, Evidence Collector, Test Results Analyzer, Workflow Optimizer |
-| `agency-specialized` | Agents Orchestrator, Data Analytics Reporter, Data Consolidation Agent, LSP Index Engineer, Report Distribution Agent, Sales Data Extraction Agent, Agentic Identity Trust |
-| `agency-spatial-computing` | visionOS Spatial Engineer, macOS Spatial Metal Engineer, XR Immersive Developer, XR Interface Architect, XR Cockpit Interaction Specialist, Terminal Integration Specialist |
+| Plugin | Description |
+|--------|-------------|
+| `agency-design` | Design-focused specialists (e.g., branding, UI/UX, visuals). See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-engineering` | Engineering and development specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-marketing` | Marketing, growth, and channel-specific specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-product` | Product strategy and discovery specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-project-management` | Project and operations management specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-support` | Support, analytics, and operations support specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-testing` | QA, validation, and testing specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-specialized` | Advanced and cross-cutting specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
+| `agency-spatial-computing` | Spatial computing and XR-focused specialists. See `.claude-plugin/plugin.json` in this plugin for the up-to-date list of skills. |
 
 ## Usage
 
