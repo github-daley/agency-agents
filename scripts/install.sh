@@ -43,6 +43,13 @@ for dir in "${AGENT_DIRS[@]}"; do
   mkdir -p "$TARGET_DIR/$dir"
 
   while IFS= read -r file; do
+    # Only install markdown files that look like agent definitions,
+    # i.e., those starting with YAML frontmatter ("---").
+    first_line="$(head -n 1 "$file" | tr -d '[:space:]')"
+    if [[ "$first_line" != '---' ]]; then
+      echo "INFO  skipping non-agent markdown file (missing YAML frontmatter): $file"
+      continue
+    fi
     cp "$file" "$TARGET_DIR/$dir/"
     installed=$((installed + 1))
   done < <(find "$dir" -maxdepth 1 -name "*.md" -type f | sort)
