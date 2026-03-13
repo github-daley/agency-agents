@@ -20,6 +20,7 @@
 #   aider        -- Copy CONVENTIONS.md to current directory
 #   windsurf     -- Copy .windsurfrules to current directory
 #   openclaw     -- Copy workspaces to ~/.openclaw/agency-agents/
+#   qwen         -- Copy SubAgents to ~/.qwen/agents/ (user-wide) or .qwen/agents/ (project)
 #   all          -- Install for all detected tools (default)
 #
 # Flags:
@@ -34,9 +35,9 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
-# Colours -- only when stdout is a real terminal
+# Colours -- only when stdout supports color
 # ---------------------------------------------------------------------------
-if [[ -t 1 ]]; then
+if [[ -t 1 && -z "${NO_COLOR:-}" && "${TERM:-}" != "dumb" ]]; then
   C_GREEN=$'\033[0;32m'
   C_YELLOW=$'\033[1;33m'
   C_RED=$'\033[0;31m'
@@ -64,11 +65,14 @@ BOX_INNER=48   # chars between the two | walls
 box_top() { printf "  +"; printf '%0.s-' $(seq 1 $BOX_INNER); printf "+\n"; }
 box_bot() { box_top; }
 box_sep() { printf "  |"; printf '%0.s-' $(seq 1 $BOX_INNER); printf "|\n"; }
+strip_ansi() {
+  awk '{ gsub(/\033\[[0-9;]*m/, ""); print }' <<< "$1"
+}
 box_row() {
   # Strip ANSI escapes when measuring visible length
   local raw="$1"
   local visible
-  visible="$(printf '%s' "$raw" | sed 's/\x1b\[[0-9;]*m//g')"
+  visible="$(strip_ansi "$raw")"
   local pad=$(( BOX_INNER - 2 - ${#visible} ))
   if (( pad < 0 )); then pad=0; fi
   printf "  | %s%*s |\n" "$raw" "$pad" ''
@@ -82,7 +86,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INTEGRATIONS="$REPO_ROOT/integrations"
 
-ALL_TOOLS=(claude-code copilot antigravity gemini-cli opencode openclaw cursor codex aider windsurf)
+ALL_TOOLS=(claude-code copilot antigravity gemini-cli opencode openclaw cursor codex aider windsurf qwen)
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -115,6 +119,7 @@ detect_codex()        { command -v codex >/dev/null 2>&1; }
 detect_aider()        { command -v aider >/dev/null 2>&1; }
 detect_openclaw()     { command -v openclaw >/dev/null 2>&1 || [[ -d "${HOME}/.openclaw" ]]; }
 detect_windsurf()     { command -v windsurf >/dev/null 2>&1 || [[ -d "${HOME}/.codeium" ]]; }
+detect_qwen()         { command -v qwen >/dev/null 2>&1 || [[ -d "${HOME}/.qwen" ]]; }
 
 is_detected() {
   case "$1" in
@@ -128,6 +133,7 @@ is_detected() {
     codex)       detect_codex       ;;
     aider)       detect_aider       ;;
     windsurf)    detect_windsurf    ;;
+    qwen)        detect_qwen        ;;
     *)           return 1 ;;
   esac
 }
@@ -145,6 +151,7 @@ tool_label() {
     codex)       printf "%-14s  %s" "Codex"        "(AGENTS.md)"             ;;
     aider)       printf "%-14s  %s" "Aider"        "(CONVENTIONS.md)"        ;;
     windsurf)    printf "%-14s  %s" "Windsurf"     "(.windsurfrules)"        ;;
+    qwen)        printf "%-14s  %s" "Qwen Code"    "(~/.qwen/agents)"        ;;
   esac
 }
 
@@ -200,7 +207,7 @@ interactive_select() {
     # --- controls ---
     printf "\n"
     printf "  ------------------------------------------------\n"
-    printf "  ${C_CYAN}[1-10]${C_RESET} toggle   ${C_CYAN}[a]${C_RESET} all   ${C_CYAN}[n]${C_RESET} none   ${C_CYAN}[d]${C_RESET} detected\n"
+    printf "  ${C_CYAN}[1-%s]${C_RESET} toggle   ${C_CYAN}[a]${C_RESET} all   ${C_CYAN}[n]${C_RESET} none   ${C_CYAN}[d]${C_RESET} detected\n" "${#ALL_TOOLS[@]}"
     printf "  ${C_GREEN}[Enter]${C_RESET} install   ${C_RED}[q]${C_RESET} quit\n"
     printf "\n"
     printf "  >> "
@@ -322,16 +329,20 @@ install_gemini_cli() {
   local src="$INTEGRATIONS/gemini-cli"
   local dest="${HOME}/.gemini/extensions/agency-agents"
   local count=0
-  [[ -d "$src" ]] || { err "integrations/gemini-cli missing. Run convert.sh first."; return 1; }
+  local manifest="$src/gemini-extension.json"
+  local skills_dir="$src/skills"
+  [[ -d "$src" ]] || { err "integrations/gemini-cli missing. Run ./scripts/convert.sh --tool gemini-cli first."; return 1; }
+  [[ -f "$manifest" ]] || { err "integrations/gemini-cli/gemini-extension.json missing. Run ./scripts/convert.sh --tool gemini-cli first."; return 1; }
+  [[ -d "$skills_dir" ]] || { err "integrations/gemini-cli/skills missing. Run ./scripts/convert.sh --tool gemini-cli first."; return 1; }
   mkdir -p "$dest/skills"
-  cp "$src/gemini-extension.json" "$dest/gemini-extension.json"
+  cp "$manifest" "$dest/gemini-extension.json"
   local d
   while IFS= read -r -d '' d; do
     local name; name="$(basename "$d")"
     mkdir -p "$dest/skills/$name"
     cp "$d/SKILL.md" "$dest/skills/$name/SKILL.md"
     (( count++ )) || true
-  done < <(find "$src/skills" -mindepth 1 -maxdepth 1 -type d -print0)
+  done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type d -print0)
   ok "Gemini CLI: $count skills -> $dest"
 }
 
@@ -427,6 +438,26 @@ install_windsurf() {
   warn "Windsurf: project-scoped. Run from your project root to install there."
 }
 
+install_qwen() {
+  local src="$INTEGRATIONS/qwen/agents"
+  local dest="${PWD}/.qwen/agents"
+  local count=0
+
+  [[ -d "$src" ]] || { err "integrations/qwen missing. Run convert.sh first."; return 1; }
+
+  mkdir -p "$dest"
+
+  local f
+  while IFS= read -r -d '' f; do
+    cp "$f" "$dest/"
+    (( count++ )) || true
+  done < <(find "$src" -maxdepth 1 -name "*.md" -print0)
+
+  ok "Qwen Code: installed $count agents to $dest"
+  warn "Qwen Code: project-scoped. Run from your project root to install there."
+  warn "Tip: Run '/agents manage' in Qwen Code to refresh, or restart session"
+}
+
 install_tool() {
   case "$1" in
     claude-code) install_claude_code ;;
@@ -439,6 +470,7 @@ install_tool() {
     codex)       install_codex       ;;
     aider)       install_aider       ;;
     windsurf)    install_windsurf    ;;
+    qwen)        install_qwen        ;;
   esac
 }
 
