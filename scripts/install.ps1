@@ -35,18 +35,18 @@ $AllTools = @("claude-code", "copilot", "antigravity", "gemini-cli", "opencode",
 
 function Test-Detected {
     param($T)
-    $Home = $env:USERPROFILE
+    $UserHome = $env:USERPROFILE
     switch ($T) {
-        "claude-code" { return Test-Path (Join-Path $Home ".claude") }
-        "copilot"     { return (Get-Command "code" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".github")) -or (Test-Path (Join-Path $Home ".copilot")) }
-        "antigravity" { return Test-Path (Join-Path $Home ".gemini\antigravity\skills") }
-        "gemini-cli"  { return (Get-Command "gemini" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".gemini")) }
-        "cursor"      { return (Get-Command "cursor" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".cursor")) }
-        "opencode"    { return (Get-Command "opencode" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".config\opencode")) }
+        "claude-code" { return Test-Path (Join-Path $UserHome ".claude") }
+        "copilot"     { return (Get-Command "code" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".github")) -or (Test-Path (Join-Path $UserHome ".copilot")) }
+        "antigravity" { return Test-Path (Join-Path $UserHome ".gemini\antigravity\skills") }
+        "gemini-cli"  { return (Get-Command "gemini" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".gemini")) }
+        "cursor"      { return (Get-Command "cursor" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".cursor")) }
+        "opencode"    { return (Get-Command "opencode" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".config\opencode")) }
         "aider"        { return [bool](Get-Command "aider" -ErrorAction SilentlyContinue) }
-        "openclaw"    { return (Get-Command "openclaw" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".openclaw")) }
-        "windsurf"    { return (Get-Command "windsurf" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".codeium")) }
-        "qwen"         { return (Get-Command "qwen" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $Home ".qwen")) }
+        "openclaw"    { return (Get-Command "openclaw" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".openclaw")) }
+        "windsurf"    { return (Get-Command "windsurf" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".codeium")) }
+        "qwen"         { return (Get-Command "qwen" -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $UserHome ".qwen")) }
     }
     return $false
 }
@@ -63,7 +63,7 @@ function Install-ClaudeCode {
         if (Test-Path $Path) {
             $Files = Get-ChildItem -Path $Path -Filter "*.md" -File
             foreach ($F in $Files) {
-                if ((Get-Content $F.FullName -TotalCount 1).StartsWith("---")) {
+                if ((Get-Content $F.FullName -TotalCount 1 -Encoding UTF8).StartsWith("---")) {
                     Copy-Item $F.FullName $Dest -Force
                     $Count++
                 }
@@ -85,7 +85,7 @@ function Install-Copilot {
         if (Test-Path $Path) {
             $Files = Get-ChildItem -Path $Path -Filter "*.md" -File
             foreach ($F in $Files) {
-                if ((Get-Content $F.FullName -TotalCount 1).StartsWith("---")) {
+                if ((Get-Content $F.FullName -TotalCount 1 -Encoding UTF8).StartsWith("---")) {
                     Copy-Item $F.FullName $DestGithub -Force
                     Copy-Item $F.FullName $DestCopilot -Force
                     $Count++
