@@ -27,7 +27,7 @@
 |---|---|
 | Paul Neuner | Co-Founder and CEO |
 | Parker Spann | EVP Business Development & Strategy; Founder of Telcoin Association; Executive Director of TAO |
-| Jeff Quigley | EVP, Business Development & Communications (also cited as EVP, Commercial); founding member of Telcoin (2017); based in Tokyo; leads global telecom, fintech, mobile money, and government partnerships |
+| Jeff Quigley | EVP, Business Development & Communications (also cited as EVP, Commercial); founding member of Telcoin (2017); based in Tokyo; leads global telecom, fintech, mobile money, and government partnerships. Background: journalism + venture capital (The Diplomat, Tech in Asia, Fenox Venture Capital). CEO Neuner's characterization of his approach: "fiat first" — connecting crypto to real banking and mobile money infrastructure rather than operating standalone. Prior conferences: Consensus Hong Kong, InnoVEX at Computex Taiwan. **DC Blockchain Summit 2026 representative.** |
 | Tim Mahota | General Counsel and Chief Compliance Officer |
 | Richard Schendel | VP Banking Operations |
 | Rajesh Sabari | Chief Commercial Officer, CFA |
