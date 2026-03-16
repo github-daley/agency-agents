@@ -31,6 +31,15 @@ What governance failures in other blockchain projects do you think were avoidabl
 **Conversation Prompt:** What governance failures in other blockchain projects do you think were avoidable with better institutional design?
 
 ---
+**IMAGE BRIEF**
+- **Card**: 1200x675px Header
+- **Concept**: A fractured architectural structure — a dark geometric framework splitting apart at its joints, with Royal Blue support beams holding one half together while the other half dissolves into fragmented nodes. Visualizes what happens to coordination systems without designed governance before a word is read.
+- **AI prompt**: `Dark geometric architectural framework splitting apart at its structural joints, left side fragmenting into disconnected floating nodes with dim gray light, right side held together by glowing royal blue #3642B2 structural beams, deep atmospheric contrast, institutional brand photography, governance aesthetic, glowing electric blue light #14C8FF, deep shadows, hexagonal geometric shapes, crystalline structure, glass panels, solid background #090920, primary accent #3642B2, highlight accents #14C8FF, --ar 16:9 --v 6 --style raw --q 2 --no text watermark logo cartoon anime neon rainbow stock photo`
+- **On-card headline**: Governance Built In, Not Bolted On
+- **Label tag**: Governance Design
+---
+
+---
 
 ## LP3-02: GSMA Validators Explained
 
@@ -57,6 +66,15 @@ What advantages do you see in requiring validators to be licensed, regulated tel
 **Conversation Prompt:** What advantages do you see in requiring validators to be licensed, regulated telecommunications companies?
 
 ---
+**IMAGE BRIEF**
+- **Card**: 1200x675px Header
+- **Concept**: A single tall telecom tower rising from a dark plane, its hexagonal lattice structure lit in institutional Royal Blue with TEL Blue signal paths radiating outward from its apex — contrasting sharply with a faint, formless cluster of anonymous nodes dissolving in the background. Represents the MNO validator model against anonymous PoS infrastructure.
+- **AI prompt**: `Tall hexagonal lattice telecom tower rising from dark ground plane, glowing royal blue #3642B2 structural geometry with electric blue #14C8FF signal beams radiating from apex, background containing faint dissolving cluster of anonymous shapeless nodes fading into darkness, institutional infrastructure versus unregulated mass, institutional brand photography, governance aesthetic, glowing electric blue light, deep shadows, hexagonal geometric shapes, crystalline structure, glass panels, solid background #090920, --ar 16:9 --v 6 --style raw --q 2 --no text watermark logo cartoon anime neon rainbow stock photo`
+- **On-card headline**: Only GSMA Full-Member MNOs Validate Transactions
+- **Label tag**: GSMA Partnership
+---
+
+---
 
 ## LP3-03: Constitutional vs. Ad-Hoc Governance
 
@@ -81,6 +99,15 @@ Do you believe written governance frameworks are essential for institutional ado
 **Rationale:** Positions constitutional governance as a prerequisite for institutional trust. The structural elements listed are all verifiable facts from the research file. Highlights predictability as the value proposition, connecting governance to adoption.
 
 **Conversation Prompt:** Do you believe written governance frameworks are essential for institutional adoption of blockchain networks?
+
+---
+**IMAGE BRIEF**
+- **Card**: 1200x675px Header
+- **Concept**: An open codex or constitution rendered as a dark glass tablet — geometric, slab-like, with electric blue text-line patterns etched into its surface — resting on a dark architectural surface. Signals written, binding rules as a physical object of institutional weight.
+- **AI prompt**: `Monolithic dark glass slab tablet resting on a dark stone surface, electric blue geometric line patterns etched across its face resembling structured written text without forming legible words, institutional document rendered as architecture, formal and immovable, institutional brand photography, governance aesthetic, glowing electric blue light #14C8FF, deep shadows, hexagonal geometric shapes, crystalline structure, glass panels, solid background #090920, primary accent #3642B2, highlight accents #14C8FF, --ar 16:9 --v 6 --style raw --q 2 --no text watermark logo cartoon anime neon rainbow stock photo`
+- **On-card headline**: Constitutional Governance. Written Rules. Binding Framework.
+- **Label tag**: Governance Design
+---
 
 ---
 
