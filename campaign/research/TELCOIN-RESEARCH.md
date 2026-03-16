@@ -1,5 +1,5 @@
 # Telcoin Association & Network — Campaign Research
-## Last updated: March 15, 2026
+## Last updated: March 16, 2026
 ## Sources: telcoin.org, telcoin.network, forum.telcoin.org, CoinMarketCap, Business Wire, Governor of Nebraska, GitHub, web search, council call recap (week of Mar 10), telcoinwiki.com (full site crawl March 15, 2026)
 
 > Roadmap data sourced directly from roadmap.telcoin.network (screenshots, March 10, 2026).
@@ -27,6 +27,7 @@
 |---|---|
 | Paul Neuner | Co-Founder and CEO |
 | Parker Spann | EVP Business Development & Strategy; Founder of Telcoin Association; Executive Director of TAO |
+| Jeff Quigley | EVP, Business Development & Communications (also cited as EVP, Commercial); founding member of Telcoin (2017); based in Tokyo; leads global telecom, fintech, mobile money, and government partnerships |
 | Tim Mahota | General Counsel and Chief Compliance Officer |
 | Richard Schendel | VP Banking Operations |
 | Rajesh Sabari | Chief Commercial Officer, CFA |
@@ -209,7 +210,7 @@ Source: forum.telcoin.org/t/tanip-trading-fee-rebate-program/824 — submitted D
 **Funding & governance**:
 - Funded by existing TAN Council Safe (164–165M TEL carryforward from Y1+Y2)
 - Distributed weekly through a **newly deployed** TANIssuanceHistory contract
-- TANIssuanceHistory redeployment = **Lifetime TEL issuance resets to zero** for all wallets (unavoidable; flagged in proposal)
+- TANIssuanceHistory redeployment: **Current cap levels will be retained** — no lifetime issuance reset (decision confirmed Mar 16, 2026; earlier proposal language flagging a reset does not reflect final implementation)
 - No new app integrations required for stakers
 
 **Implementation path**:
@@ -369,6 +370,7 @@ Source: TELx Council recap (week of Mar 10, 2026)
 ### @telcoinTAO (X/Twitter)
 - Primary official account for Telcoin Association
 - Bronze Sponsor of DC Blockchain Summit 2026 (March 17–18, Washington DC) — confirmed via summit sponsor page Mar 11, 2026 (Silver in 2025, Bronze in 2026)
+- **DC Summit representative**: Jeff Quigley (EVP, Business Development & Communications) is the Telcoin keynote speaker / floor representative at DC Blockchain Summit 2026
 - Content: Roadmap updates, governance announcements, network milestones
 
 ### Reddit: r/telcoin
@@ -541,12 +543,24 @@ Categories include: official documentation, liquidity tools, regulatory filings,
 
 ---
 
-## 9. THINGS TO VERIFY BEFORE PUBLISHING
+## 9. EDITORIAL POLICY (Standing Directives — Mar 16, 2026)
+
+| Topic | Directive |
+|---|---|
+| Token price / price-fundamentals disconnect | **Do not address.** Focus on what we are building, not token price or market conditions. No commentary on price action, market cap, or price vs. fundamentals disconnect. |
+| MNO validator names | **Do not publish.** The Association will not announce names. MNOs will announce independently on their own timeline. MNOs will need to publicly apply on the forum for mainnet validator status. |
+| Lifetime issuance history reset | **Not happening.** Current cap levels are being retained in the Trading Fee Rebate Program redeployment. Do not reference a reset in any public-facing content. |
+| Hype language | Never: "moon", "soon™", "massive", "100x", "game-changer", "imminent", "revolutionary" |
+| Mainnet timing | Always milestone-based, never calendar-based. Link to roadmap.telcoin.network. |
+
+---
+
+## 10. THINGS TO VERIFY BEFORE PUBLISHING
 
 - [x] Mainnet timeline/phases — confirmed from roadmap.telcoin.network (March 10, 2026)
 - [x] 2026 DC Blockchain Summit sponsorship tier — Bronze (confirmed Mar 11, 2026)
 - [ ] Wallet V5 exact launch date
-- [ ] Which specific MNOs have committed as mainnet validators
+- [ ] Which specific MNOs have committed as mainnet validators — **NOTE (Mar 16, 2026): Telcoin Association will NOT announce MNO validator names publicly. MNOs will make their own announcements on their own timelines. MNOs will need to apply publicly on the forum to become validators at mainnet. Do not speculate or prompt for named validators in content.**
 - [ ] Current TVL in TELx (check telx.network/pools)
 - [ ] Current follower count on @telcoinTAO
 - [ ] Any new corridor/partnership announcements since Jan 2026
