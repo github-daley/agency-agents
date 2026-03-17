@@ -48,9 +48,11 @@ color: "#00FFFF"
 ## Project vs Global
 
 Agents in `.opencode/agents/` are **project-scoped**. To make them available
-globally across all projects, use the install script with `--path`:
+globally across all projects, first generate the agent files, then install
+with `--path`:
 
 ```bash
+./scripts/convert.sh --tool opencode
 ./scripts/install.sh --tool opencode --path ~/.config/opencode/agents
 ```
 
