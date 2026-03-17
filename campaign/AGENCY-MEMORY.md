@@ -53,7 +53,9 @@ These are monitored daily. Output files saved to `campaign/research/intel-*.md`.
 
 | Video/Stream Title | Upload Date | Repurposed? | Output Files |
 |---|---|---|---|
-| — | — | Not yet logged | First session will populate this |
+| Platform & Treasury Council #26 | ~Mar 12, 2026 | Not yet repurposed | Opportunity flagged 2026-03-17 — mainnet infrastructure sequencing thread, BLS resolution tweet, TANIP rebate thread |
+| TELx Council (Merkl vote session) | ~Mar 10, 2026 | Not yet repurposed | Opportunity flagged 2026-03-17 — Merkl trial explainer tweet, TELx governance recap |
+| TELx Council #19 | Mar 18, 2026 (UPCOMING) | Not yet repurposed | Repurpose immediately after session — live March 18, 3PM EST |
 
 ---
 
@@ -63,7 +65,7 @@ These are monitored daily. Output files saved to `campaign/research/intel-*.md`.
 
 | Date | Type | Topic | Notes |
 |---|---|---|---|
-| — | — | — | No sessions logged yet. First session will populate this. |
+| 2026-03-17 | Twitter threads | eUSD/CBDC, mainnet status, GSMA whitepaper, TELx preview, eUSD vs USDC | Drafted; pending QC and publish |
 
 ---
 
@@ -77,12 +79,18 @@ Ideas generated but not yet executed. Pull from here when planning daily output.
 - [ ] Video concept: "The problem with sending money abroad" — remittance pain point, then Telcoin solution
 - [ ] Infographic: Remittance fee comparison — Telcoin 2% vs Western Union 3–8% vs bank wire $25–$45
 - [ ] Thread: "What happened at MWC Barcelona" — private MNO meetings, what it means for mainnet
-- [ ] Post: Merkl trial approval — governance milestone, what it means for liquidity miners
+- [x] 2026-03-17 Post: Merkl trial approval — governance milestone, what it means for liquidity miners
 - [ ] Builder spotlight: Cody's random square game — fun, accessible, TAN ecosystem growth
 - [ ] Thread: "The Telcoin Name Service" — .tel addresses, what it means for UX
 - [ ] Charity NFT concept post — Leo's vision, on-chain transparency in giving
 - [ ] Thread: "Phase 1 complete — here's what the Adiri testnet accomplished"
 - [ ] Post: LayerZero integration — why decentralized bridge validators align with GSMA MNO model
+- [ ] Thread: eUSD "how to use it right now" step-by-step guide (top community question)
+- [ ] Post: Named telecom validator disclosure (if/when available)
+- [ ] Post: TANIP1 activation timing — what users need to do and when
+- [ ] Thread: TEL vs. XRP vs. XLM differentiation (preempt the comparison narrative)
+- [ ] Post: DC Blockchain Summit rapid response (hold for Jeff Quigley signal)
+- [ ] Post: "Coinmetro cancellation" transparency note (low priority, addresses lingering skepticism)
 
 ---
 
@@ -94,6 +102,11 @@ Ideas generated but not yet executed. Pull from here when planning daily output.
 - Want: Progress updates, governance transparency, staking info, roadmap milestones
 - Respond to: Specific milestone completions, concrete numbers, honest timeline communication
 - Avoid: Vague hype, moon talk, competitor attacks
+- **Active questions (as of 2026-03-17)**:
+  - "When is mainnet?" — #1 question; factual status thread produced 2026-03-17
+  - "What can I do with eUSD right now?" — usage guide needed; partial answer in CBDC thread
+  - "Who are the actual telecom validators?" — credibility gap; named list needed when available
+  - "Is TANIP1 live yet?" — post-vote silence generating anxiety
 
 ### Telecom / MNO Executives
 - Want: Revenue model clarity, regulatory credibility, technical readiness proof
@@ -133,6 +146,9 @@ Ideas generated but not yet executed. Pull from here when planning daily output.
 - [ ] Do we have access to @telcoinTAO for direct publishing, or are we drafting for someone else to post?
 - [ ] What's the priority ranking: X/Twitter > YouTube > TikTok > Instagram? Or different?
 - [ ] Are there any paid promotion budgets (for boosted posts, sponsored content)?
+- [ ] DC Blockchain Summit: does Jeff Quigley have updates to share? Any CLARITY Act announcements to respond to?
+- [ ] LP2 Post 4 (eUSD/TDAB) — publish this week or after today's eUSD threads land?
+- [ ] GSMA whitepaper URL — confirm for first-reply placement on GSMA thread
 
 ---
 
@@ -140,13 +156,7 @@ Ideas generated but not yet executed. Pull from here when planning daily output.
 
 *(Overwritten each session by Agents Orchestrator)*
 
-**Date**: March 11, 2026
-**Session type**: Setup
-**What was built**:
-- Full agency OS: CLAUDE.md, AGENTS.md, WORKFLOW.md
-- Design team: DESIGN-TEAM.md + templates
-- This memory file
-- Daily automation system
-
-**What's ready to produce**: All research complete. Ready for first content sprint.
-**Blocked on**: User approval of content before first posts go out. Platform priority order TBD.
+**Date**: 2026-03-17
+**What was produced**: Intel sweeps (X, YouTube, market), briefing, standup, 4 Twitter content files (eUSD/CBDC, mainnet audit, GSMA whitepaper, TELx preview + eUSD/USDC positioning)
+**Key intel**: U.S. Senate CBDC ban favors bank-issued model (eUSD); CLARITY Act stalled; GSMA whitepaper co-authored with Telcoin members; TELx Council #19 tomorrow March 18 3PM EST
+**Blocked**: DC Blockchain Summit rapid response (needs signal from Jeff Quigley); LP2 Post 4 publish timing decision
