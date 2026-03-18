@@ -18,6 +18,13 @@ import logging
 import signal
 import sys
 
+# Auto-load .env file — works on Windows CMD without needing `source .env`
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed; rely on env vars being set manually
+
 from polymarket_bot.config import Config
 from polymarket_bot.monitor import Monitor
 from polymarket_bot.paper_trader import PaperTrader
