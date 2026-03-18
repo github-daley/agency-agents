@@ -65,7 +65,7 @@ class Config:
     )
     market_timeframes: str = field(
         default_factory=lambda: os.environ.get(
-            "MARKET_TIMEFRAMES", "5 min|5min|15 min|15min|1 hour|60 min|1hr"
+            "MARKET_TIMEFRAMES", ""
         )
     )
 
@@ -73,7 +73,7 @@ class Config:
     # Minimum lifetime volume (volumeNum from Gamma API)
     min_market_volume_usdc: float = field(
         default_factory=lambda: float(
-            os.environ.get("MIN_MARKET_VOLUME_USDC", "1000")
+            os.environ.get("MIN_MARKET_VOLUME_USDC", "10000")
         )
     )
     max_spread: float = field(
