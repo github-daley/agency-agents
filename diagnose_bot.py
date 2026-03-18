@@ -1,0 +1,144 @@
+"""
+diagnose_bot.py — Diagnoses why the bot is taking 0 trades.
+
+Run this first:
+    python diagnose_bot.py
+
+It will show you:
+  1. Raw Gamma API response (first market)
+  2. How many markets pass each filter stage
+  3. Sample order intents that would be generated
+  4. Any errors in parsing
+"""
+
+import asyncio
+import json
+import httpx
+
+GAMMA_API = "https://gamma-api.polymarket.com"
+
+
+async def main():
+    print("=" * 60)
+    print("STEP 1 — Raw Gamma API response (first 2 markets)")
+    print("=" * 60)
+
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.get(
+            f"{GAMMA_API}/markets",
+            params={"active": "true", "closed": "false", "limit": 5},
+        )
+        print(f"HTTP status: {resp.status_code}")
+        data = resp.json()
+
+    if not data:
+        print("ERROR: API returned empty response!")
+        return
+
+    print(f"Total markets returned in batch: {len(data)}")
+    print(f"\nFirst market raw keys: {list(data[0].keys())}")
+    print(f"\nFirst market raw JSON:")
+    print(json.dumps(data[0], indent=2, default=str)[:3000])
+
+    print("\n" + "=" * 60)
+    print("STEP 2 — Filter diagnostics across 100 markets")
+    print("=" * 60)
+
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.get(
+            f"{GAMMA_API}/markets",
+            params={"active": "true", "closed": "false", "limit": 100},
+        )
+        all_markets = resp.json()
+
+    total         = len(all_markets)
+    has_prices    = 0
+    active        = 0
+    vol_pass      = 0
+    spread_pass   = 0
+    price_pass    = 0
+    all_pass      = 0
+
+    MIN_VOL    = 10_000
+    MAX_SPREAD = 0.05
+    MIN_PRICE  = 0.03
+    MAX_PRICE  = 0.97
+
+    for m in all_markets:
+        prices = m.get("outcomePrices", [])
+        if prices and len(prices) >= 2:
+            has_prices += 1
+        else:
+            continue
+
+        if not m.get("active", True):
+            continue
+        active += 1
+
+        # Volume — try multiple field names
+        vol = float(
+            m.get("volume") or m.get("volumeNum") or m.get("volume24hr") or 0
+        )
+        if vol >= MIN_VOL:
+            vol_pass += 1
+        else:
+            continue
+
+        # Spread
+        best_ask = m.get("bestAsk")
+        best_bid = m.get("bestBid")
+        yes_price = float(prices[0])
+        no_price  = float(prices[1])
+        if best_ask and best_bid:
+            spread = float(best_ask) - float(best_bid)
+        else:
+            spread = abs(yes_price - (1.0 - no_price))
+        if spread <= MAX_SPREAD:
+            spread_pass += 1
+        else:
+            continue
+
+        # Price range
+        if MIN_PRICE <= yes_price <= MAX_PRICE:
+            price_pass += 1
+            all_pass += 1
+
+    print(f"Total markets in batch:         {total}")
+    print(f"  Have outcomePrices:           {has_prices}")
+    print(f"  Active:                       {active}")
+    print(f"  Pass vol > ${MIN_VOL:,}:         {vol_pass}")
+    print(f"  Pass spread < {MAX_SPREAD}:        {spread_pass}")
+    print(f"  Pass price [{MIN_PRICE},{MAX_PRICE}]:    {price_pass}")
+    print(f"\n  >>> MARKETS THAT WOULD BE TRADED: {all_pass} <<<")
+
+    # Show volume distribution
+    vols = []
+    for m in all_markets:
+        vol = float(m.get("volume") or m.get("volumeNum") or m.get("volume24hr") or 0)
+        vols.append(vol)
+    vols.sort(reverse=True)
+    print(f"\nVolume distribution (top 10): {[round(v) for v in vols[:10]]}")
+    print(f"Median volume: {sorted(vols)[len(vols)//2]:.0f}")
+    print(f"Markets with vol > $10k: {sum(1 for v in vols if v > 10_000)}")
+    print(f"Markets with vol > $1k:  {sum(1 for v in vols if v > 1_000)}")
+    print(f"Markets with vol > $100: {sum(1 for v in vols if v > 100)}")
+
+    print("\n" + "=" * 60)
+    print("STEP 3 — Volume field names actually present")
+    print("=" * 60)
+    vol_fields = ["volume", "volumeNum", "volume24hr", "volumeClob", "usdcSize"]
+    for field in vol_fields:
+        count = sum(1 for m in all_markets if m.get(field) is not None)
+        if count > 0:
+            sample = [
+                round(float(m[field]), 2)
+                for m in all_markets[:5]
+                if m.get(field) is not None
+            ]
+            print(f"  '{field}' present in {count}/{total} markets  — samples: {sample}")
+        else:
+            print(f"  '{field}' NOT FOUND")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
