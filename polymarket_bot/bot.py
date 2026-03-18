@@ -106,6 +106,55 @@ class PolymarketLPBot:
             fills.append(fill)
         return fills
 
+    async def _check_take_profits(self, market_prices: dict[str, dict[str, float]]) -> int:
+        """
+        Exit any open position whose current token price has reached TAKE_PROFIT_PRICE.
+        Uses market prices already fetched in run_once() — no extra API calls.
+        Logs each exit as WIN if pnl > 0, LOSS otherwise.
+        Returns number of take-profit exits executed.
+        """
+        tp = self.cfg.take_profit_price
+        taken = 0
+
+        for market_id, outcome_prices in market_prices.items():
+            if market_id not in self.risk.positions:
+                continue
+            for outcome, current_price in outcome_prices.items():
+                rec = self.risk.positions[market_id].get(outcome)
+                if rec is None or rec.tokens_held <= 0:
+                    continue
+                if current_price < tp:
+                    continue
+
+                question = self.risk.market_questions.get(market_id, "")
+                # Capture cost-per-token before sell modifies the position
+                cost_per_token = rec.cost_basis_usdc / rec.tokens_held
+                tokens = rec.tokens_held
+
+                logger.info(
+                    "TAKE PROFIT | %s | %s | price=%.4f ≥ %.2f",
+                    market_id[:16], outcome, current_price, tp,
+                )
+
+                fill = await self.executor.execute_sell(
+                    market_id=market_id,
+                    question=question,
+                    outcome=outcome,
+                    tokens=tokens,
+                    price=current_price,
+                )
+                fill.side = "TP"
+                fill.pnl_usdc = fill.size_usdc - (cost_per_token * fill.tokens)
+                won = fill.pnl_usdc > 0
+                logger.info(
+                    "TP %s | %s | %s | pnl=$%+.2f",
+                    "WIN" if won else "LOSS", market_id[:16], outcome, fill.pnl_usdc,
+                )
+                self.monitor.log_fill(fill)
+                taken += 1
+
+        return taken
+
     async def _settle_closed_positions(self) -> int:
         """
         Check ALL open positions for settlement.
@@ -292,6 +341,11 @@ class PolymarketLPBot:
                 break
 
             markets_scanned, intents_gen, fills_exec, prices = await self.run_once()
+
+            # Take-profit exits (checked every cycle)
+            tp_taken = await self._check_take_profits(prices)
+            if tp_taken:
+                logger.info("Take-profit exits: %d position(s) this cycle", tp_taken)
 
             # Settle any positions whose markets have now closed
             settled = await self._settle_closed_positions()

@@ -128,6 +128,10 @@ class Config:
     order_delay_sec: float = field(
         default_factory=lambda: float(os.environ.get("ORDER_DELAY_SEC", "0.5"))
     )
+    # Automatically exit a position when its token price reaches this level
+    take_profit_price: float = field(
+        default_factory=lambda: float(os.environ.get("TAKE_PROFIT_PRICE", "0.98"))
+    )
 
     # ── Mode ──────────────────────────────────────────────────
     # "paper" = simulate only, "live" = real orders
@@ -170,6 +174,7 @@ class Config:
             f"  Max per market:    {self.max_market_exposure_pct*100:.0f}% of bankroll\n"
             f"  Daily loss limit:  {self.daily_loss_limit_pct*100:.0f}% of bankroll\n"
             f"  Scan interval:     {self.scan_interval_sec}s\n"
+            f"  Take profit:       {self.take_profit_price:.2f}\n"
             f"  Log file:          {self.log_file}\n"
             f"{'='*55}"
         )
