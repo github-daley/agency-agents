@@ -416,6 +416,75 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# ── Export ───────────────────────────────────────────────────
+st.markdown("""
+<div class="term-box">
+  <div class="term-box-title">── EXPORT TRADES FOR COMPARISON</div>
+</div>
+""", unsafe_allow_html=True)
+
+# Build a comparison-friendly export that mirrors the original trade CSV format
+if not buys.empty:
+    export = buys[["timestamp", "question", "outcome", "fill_price", "size_usdc", "tokens", "market_end_ts"]].copy()
+    export.columns = ["timestamp", "market", "outcome", "entry_price", "size_usdc", "tokens", "market_end_ts"]
+
+    # Attach settlement info
+    settle_lookup = settles.set_index(["market_id", "outcome"])[["fill_price", "pnl_usdc", "timestamp"]].copy()
+    settle_lookup.columns = ["payout_price", "pnl_usdc", "settled_at"]
+
+    buy_keys = list(zip(buys["market_id"], buys["outcome"]))
+    export["payout_price"] = [
+        settle_lookup.loc[(mid, out), "payout_price"]
+        if (mid, out) in settle_lookup.index else None
+        for mid, out in zip(buys["market_id"], buys["outcome"])
+    ]
+    export["pnl_usdc"] = [
+        settle_lookup.loc[(mid, out), "pnl_usdc"]
+        if (mid, out) in settle_lookup.index else None
+        for mid, out in zip(buys["market_id"], buys["outcome"])
+    ]
+    export["settled_at"] = [
+        settle_lookup.loc[(mid, out), "settled_at"]
+        if (mid, out) in settle_lookup.index else None
+        for mid, out in zip(buys["market_id"], buys["outcome"])
+    ]
+    export["result"] = export["payout_price"].apply(
+        lambda p: "WIN" if p is not None and p >= 0.99
+        else ("LOSS" if p is not None and p < 0.01 else "OPEN")
+    )
+    export["market_end_ts"] = export["market_end_ts"].apply(
+        lambda ts: datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S UTC")
+        if ts and ts > 0 else ""
+    )
+
+    export_csv = export.to_csv(index=False)
+    fname = f"bot_trades_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+    st.download_button(
+        label="⬇  Download trade export CSV",
+        data=export_csv,
+        file_name=fname,
+        mime="text/csv",
+        help="Download a CSV comparing bot trades to the original account format",
+    )
+
+    # Preview the first 10 rows
+    st.markdown(f"""
+    <div style="font-size:11px; color:#555; margin-top:6px; margin-bottom:4px;">
+      Preview — {len(export)} trades &nbsp;|&nbsp; {len(export[export['result']=='WIN'])} wins &nbsp;
+      {len(export[export['result']=='LOSS'])} losses &nbsp;
+      {len(export[export['result']=='OPEN'])} open
+    </div>
+    """, unsafe_allow_html=True)
+    st.dataframe(
+        export.head(10),
+        use_container_width=True,
+        hide_index=True,
+    )
+else:
+    st.markdown('<div style="color:#555; font-size:12px; padding:4px 0;">No trades to export yet.</div>',
+                unsafe_allow_html=True)
+
 # ── Auto-refresh ──────────────────────────────────────────────
 time.sleep(REFRESH_SEC)
 st.rerun()
