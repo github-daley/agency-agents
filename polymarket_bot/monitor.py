@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 _CSV_FIELDS = [
     "timestamp", "mode", "market_id", "question", "outcome",
-    "side", "price", "fill_price", "size_usdc", "tokens", "success", "reason",
+    "side", "price", "fill_price", "size_usdc", "tokens",
+    "market_end_ts", "pnl_usdc", "success", "reason",
 ]
 
 
@@ -30,32 +31,34 @@ class Monitor:
         self._log_path    = cfg.log_file
         self._cycle_count = 0
         self._start_time  = datetime.now(timezone.utc)
-        self._ensure_log_file()
+        self._reset_log_file()
 
-    def _ensure_log_file(self) -> None:
-        if not os.path.exists(self._log_path):
-            with open(self._log_path, "w", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=_CSV_FIELDS)
-                writer.writeheader()
-            logger.info("Trade log created: %s", self._log_path)
+    def _reset_log_file(self) -> None:
+        """Always start fresh — truncate and write header."""
+        with open(self._log_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=_CSV_FIELDS)
+            writer.writeheader()
+        logger.info("Trade log reset: %s", self._log_path)
 
     def log_fill(self, fill: FillResult) -> None:
         """Append a fill (or rejection) to the CSV trade log."""
         with open(self._log_path, "a", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=_CSV_FIELDS)
             writer.writerow({
-                "timestamp":  fill.timestamp,
-                "mode":       self.cfg.mode,
-                "market_id":  fill.market_id,
-                "question":   "",           # populated by bot.py
-                "outcome":    fill.outcome,
-                "side":       fill.side,
-                "price":      fill.price,
-                "fill_price": fill.fill_price,
-                "size_usdc":  fill.size_usdc,
-                "tokens":     fill.tokens,
-                "success":    fill.success,
-                "reason":     fill.reason,
+                "timestamp":     fill.timestamp,
+                "mode":          self.cfg.mode,
+                "market_id":     fill.market_id,
+                "question":      fill.question,
+                "outcome":       fill.outcome,
+                "side":          fill.side,
+                "price":         fill.price,
+                "fill_price":    fill.fill_price,
+                "size_usdc":     fill.size_usdc,
+                "tokens":        fill.tokens,
+                "market_end_ts": fill.market_end_ts,
+                "pnl_usdc":      fill.pnl_usdc,
+                "success":       fill.success,
+                "reason":        fill.reason,
             })
 
     def log_fills(self, fills: list[FillResult]) -> None:

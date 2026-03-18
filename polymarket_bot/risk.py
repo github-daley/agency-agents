@@ -11,6 +11,7 @@ Enforces:
 import logging
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
+from typing import Optional
 
 from .config import Config
 
@@ -46,6 +47,10 @@ class RiskState:
     # Kill switch flag
     halted: bool = False
     halt_reason: str = ""
+
+    # Market metadata for settlement tracking
+    market_end_times: dict = field(default_factory=dict)   # market_id → end_time (float)
+    market_questions: dict = field(default_factory=dict)   # market_id → question (str)
 
     # ── Accessors ────────────────────────────────────────────
 
@@ -130,7 +135,15 @@ class RiskState:
 
     # ── Updates ──────────────────────────────────────────────
 
-    def record_buy(self, market_id: str, outcome: str, size_usdc: float, price: float) -> None:
+    def record_buy(
+        self,
+        market_id: str,
+        outcome: str,
+        size_usdc: float,
+        price: float,
+        end_time: Optional[float] = None,
+        question: str = "",
+    ) -> None:
         tokens = size_usdc / price if price > 0 else 0.0
         if market_id not in self.positions:
             self.positions[market_id] = {}
@@ -140,6 +153,10 @@ class RiskState:
         rec.tokens_held     += tokens
         rec.cost_basis_usdc += size_usdc
         self.total_deployed_usdc += size_usdc
+        if end_time:
+            self.market_end_times[market_id] = end_time
+        if question:
+            self.market_questions[market_id] = question
         logger.debug(
             "BUY  %s %s  price=%.4f  size=$%.4f  tokens=%.2f",
             market_id[:16], outcome, price, size_usdc, tokens,

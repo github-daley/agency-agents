@@ -42,6 +42,7 @@ class Market:
     liquidity_usdc: float
     active: bool
     clob_token_ids: list = None   # [yes_token_id, no_token_id]
+    end_time: Optional[float] = None  # Unix timestamp when market closes
 
     @property
     def up_price(self) -> float:
@@ -147,6 +148,7 @@ async def fetch_updown_markets(
                     mkt = _parse_market(raw)
                     if mkt and mkt.id not in seen_ids:
                         if _passes_updown_filter(mkt, cfg):
+                            mkt.end_time = ts + _UPDOWN_WINDOW_SEC
                             seen_ids.add(mkt.id)
                             found.append(mkt)
                             logger.info(

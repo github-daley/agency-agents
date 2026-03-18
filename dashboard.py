@@ -1,216 +1,421 @@
 """
-dashboard.py — Real-time Polymarket LP Bot dashboard.
+dashboard.py — Terminal-style Polymarket LP Bot dashboard.
 
 Run alongside the bot:
-    pip install streamlit plotly
+    pip install streamlit
     streamlit run dashboard.py
 
-Opens automatically in your browser at http://localhost:8501
-Auto-refreshes every 5 seconds.
+Auto-refreshes every 3 seconds.
 """
 
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
 # ── Page config ──────────────────────────────────────────────
 st.set_page_config(
     page_title="Polymarket LP Bot",
-    page_icon="🧠",
+    page_icon="▶",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-LOG_FILE = "bot_trades.csv"
-REFRESH_SEC = 5
+# ── Terminal CSS ──────────────────────────────────────────────
+st.markdown("""
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
-# ── Header ────────────────────────────────────────────────────
-st.title("🧠 Polymarket LP Bot — Live Dashboard")
-st.caption(f"Reading from `{LOG_FILE}` · Auto-refreshes every {REFRESH_SEC}s")
+  html, body, [class*="css"] {
+    font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+    background-color: #0d0d0d !important;
+    color: #c8c8c8 !important;
+  }
+  .stApp { background-color: #0d0d0d; }
 
-# ── Load data ─────────────────────────────────────────────────
+  /* Header bar */
+  .term-header {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-bottom: 2px solid #00ff88;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #00ff88;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+
+  /* Section boxes */
+  .term-box {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .term-box-title {
+    color: #00aaff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid #2a2a2a;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+  }
+
+  /* Stat tiles */
+  .stat-grid { display: flex; gap: 8px; margin-bottom: 10px; }
+  .stat-tile {
+    flex: 1;
+    background: #151515;
+    border: 1px solid #2a2a2a;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .stat-label { color: #555; font-size: 10px; letter-spacing: 0.1em; }
+  .stat-value { color: #e0e0e0; font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .stat-value.green  { color: #00ff88; }
+  .stat-value.red    { color: #ff4444; }
+  .stat-value.yellow { color: #ffcc00; }
+  .stat-value.blue   { color: #00aaff; }
+
+  /* Tables */
+  .term-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .term-table th {
+    color: #555;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-align: left;
+    padding: 3px 8px;
+    border-bottom: 1px solid #222;
+  }
+  .term-table td { padding: 4px 8px; border-bottom: 1px solid #1a1a1a; }
+  .term-table tr:hover td { background: #161616; }
+
+  .buy    { color: #00aaff; }
+  .sell   { color: #ffcc00; }
+  .win    { color: #00ff88; }
+  .loss   { color: #ff4444; }
+  .settle { color: #aa88ff; }
+  .dim    { color: #555; }
+  .up     { color: #00cc66; }
+  .down   { color: #ff6655; }
+
+  /* Time left colors */
+  .time-ok     { color: #00ff88; }
+  .time-warn   { color: #ffcc00; }
+  .time-urgent { color: #ff4444; }
+
+  /* Hide streamlit chrome */
+  #MainMenu { visibility: hidden; }
+  footer    { visibility: hidden; }
+  header    { visibility: hidden; }
+  .block-container { padding-top: 0.5rem; padding-bottom: 0; max-width: 100%; }
+</style>
+""", unsafe_allow_html=True)
+
+LOG_FILE    = "bot_trades.csv"
+REFRESH_SEC = 3
+
+
+# ── Data loader ───────────────────────────────────────────────
 @st.cache_data(ttl=REFRESH_SEC)
 def load_trades(path: str) -> pd.DataFrame:
     if not Path(path).exists():
         return pd.DataFrame()
     try:
         df = pd.read_csv(path, parse_dates=["timestamp"])
-        df = df[df["success"] == True]
+        df = df[df["success"] == True].copy()
+        for col in ("market_end_ts", "pnl_usdc"):
+            if col not in df.columns:
+                df[col] = 0.0
+        df["market_end_ts"] = pd.to_numeric(df["market_end_ts"], errors="coerce").fillna(0)
+        df["pnl_usdc"]      = pd.to_numeric(df["pnl_usdc"],      errors="coerce").fillna(0)
         return df.sort_values("timestamp").reset_index(drop=True)
     except Exception:
         return pd.DataFrame()
 
 
-df = load_trades(LOG_FILE)
+def fmt_time_left(end_ts: float) -> str:
+    """Format seconds remaining as mm:ss or EXPIRED."""
+    if not end_ts:
+        return "—"
+    secs = int(end_ts - time.time())
+    if secs <= 0:
+        return "EXPIRED"
+    m, s = divmod(secs, 60)
+    return f"{m}m {s:02d}s"
 
-# ── Empty state ───────────────────────────────────────────────
+
+def time_left_class(end_ts: float) -> str:
+    if not end_ts:
+        return "dim"
+    secs = end_ts - time.time()
+    if secs <= 0:
+        return "dim"
+    if secs < 60:
+        return "time-urgent"
+    if secs < 120:
+        return "time-warn"
+    return "time-ok"
+
+
+def short_question(q: str) -> str:
+    if not q:
+        return "—"
+    # Strip "Up or Down -" prefix pattern and trim
+    for prefix in ("Up or Down - ", "up or down - "):
+        if prefix in q:
+            q = q.split(prefix, 1)[-1]
+    return q[:48]
+
+
+def outcome_html(outcome: str) -> str:
+    cls = "up" if outcome == "Up" else "down"
+    return f'<span class="{cls}">{outcome}</span>'
+
+
+def side_html(side: str) -> str:
+    mapping = {"BUY": "buy", "SELL": "sell", "SETTLE": "settle"}
+    cls = mapping.get(side, "dim")
+    return f'<span class="{cls}">{side}</span>'
+
+
+def pnl_html(pnl: float) -> str:
+    if pnl > 0:
+        return f'<span class="win">+${pnl:.2f}</span>'
+    elif pnl < 0:
+        return f'<span class="loss">-${abs(pnl):.2f}</span>'
+    return f'<span class="dim">$0.00</span>'
+
+
+# ── Load data ─────────────────────────────────────────────────
+df = load_trades(LOG_FILE)
+now_ts = time.time()
+now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
 if df.empty:
-    st.info(
-        "No trades yet. Make sure the bot is running (`python run_bot.py`) "
-        "and that `bot_trades.csv` exists in the same folder."
-    )
+    st.markdown(f"""
+    <div class="term-header">▶ POLYMARKET LP BOT &nbsp;|&nbsp; {now_str}</div>
+    <div class="term-box">
+      <div class="dim">No trades yet. Start the bot: <b>python run_bot.py</b></div>
+    </div>
+    """, unsafe_allow_html=True)
     time.sleep(REFRESH_SEC)
     st.rerun()
 
-# ── Derived columns ───────────────────────────────────────────
-buys  = df[df["side"] == "BUY"]
-sells = df[df["side"] == "SELL"]
+# ── Derived sets ──────────────────────────────────────────────
+buys    = df[df["side"] == "BUY"]
+settles = df[df["side"] == "SETTLE"]
+wins    = settles[settles["fill_price"] >= 0.99]
+losses  = settles[settles["fill_price"] < 0.01]
 
-total_deployed  = buys["size_usdc"].sum()
-total_retrieved = sells["size_usdc"].sum()
-net_exposure    = total_deployed - total_retrieved
-realised_pnl    = total_retrieved - buys.loc[
-    buys.index.isin(sells.index), "size_usdc"
-].sum() if not sells.empty else 0.0
-
-# Cumulative deployed over time
-df_buys = buys.copy()
-df_buys["cum_deployed"] = df_buys["size_usdc"].cumsum()
-
-# Per-market exposure
-mkt_exp = (
-    buys.groupby("market_id")["size_usdc"].sum()
-    - sells.groupby("market_id")["size_usdc"].sum().reindex(
-        buys["market_id"].unique(), fill_value=0
-    )
-).reset_index()
-mkt_exp.columns = ["market_id", "net_usdc"]
-mkt_exp["market_short"] = mkt_exp["market_id"].astype(str).str[:14] + "…"
-mkt_exp = mkt_exp.sort_values("net_usdc", ascending=False).head(20)
-
-# ── KPI Row ───────────────────────────────────────────────────
-k1, k2, k3, k4, k5 = st.columns(5)
-
-k1.metric("Total Trades",      f"{len(df):,}")
-k2.metric("Deployed (USDC)",   f"${total_deployed:,.2f}")
-k3.metric("Retrieved (USDC)",  f"${total_retrieved:,.2f}")
-k4.metric("Open Exposure",     f"${net_exposure:,.2f}")
-k5.metric("Markets Active",    f"{df['market_id'].nunique():,}")
-
-st.divider()
-
-# ── Charts row ────────────────────────────────────────────────
-col_left, col_right = st.columns(2)
-
-with col_left:
-    st.subheader("Cumulative Capital Deployed")
-    fig = px.area(
-        df_buys,
-        x="timestamp",
-        y="cum_deployed",
-        labels={"cum_deployed": "USDC", "timestamp": ""},
-        color_discrete_sequence=["#7C3AED"],
-    )
-    fig.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=280)
-    st.plotly_chart(fig, use_container_width=True)
-
-with col_right:
-    st.subheader("Orders by Outcome")
-    outcome_counts = df.groupby(["side", "outcome"]).size().reset_index(name="count")
-    fig2 = px.bar(
-        outcome_counts,
-        x="outcome",
-        y="count",
-        color="side",
-        barmode="group",
-        color_discrete_map={"BUY": "#7C3AED", "SELL": "#F59E0B"},
-        labels={"count": "Orders", "outcome": ""},
-    )
-    fig2.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=280)
-    st.plotly_chart(fig2, use_container_width=True)
-
-# ── Market exposure bar ───────────────────────────────────────
-st.subheader("Top 20 Markets by Open Exposure (USDC)")
-fig3 = px.bar(
-    mkt_exp,
-    x="market_short",
-    y="net_usdc",
-    color="net_usdc",
-    color_continuous_scale="Purples",
-    labels={"net_usdc": "USDC", "market_short": "Market ID"},
+# Open positions: BUY records with no SETTLE for same market_id+outcome
+settled_keys = set(zip(settles["market_id"], settles["outcome"]))
+open_mask = buys.apply(
+    lambda r: (r["market_id"], r["outcome"]) not in settled_keys, axis=1
 )
-fig3.update_layout(
-    margin=dict(l=0, r=0, t=10, b=0),
-    height=260,
-    coloraxis_showscale=False,
-)
-st.plotly_chart(fig3, use_container_width=True)
+open_buys = buys[open_mask].copy()
 
-# ── Price distribution ────────────────────────────────────────
-col3, col4 = st.columns(2)
+total_invested = buys["size_usdc"].sum()
+total_won_usdc = wins["size_usdc"].sum()
+total_pnl      = settles["pnl_usdc"].sum()
+open_exposure  = open_buys["size_usdc"].sum()
 
-with col3:
-    st.subheader("Entry Price Distribution")
-    fig4 = px.histogram(
-        buys,
-        x="fill_price",
-        nbins=40,
-        color_discrete_sequence=["#7C3AED"],
-        labels={"fill_price": "Fill Price", "count": "Orders"},
-    )
-    fig4.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=260)
-    st.plotly_chart(fig4, use_container_width=True)
+# ── Header bar ────────────────────────────────────────────────
+mode_str = df["mode"].iloc[-1].upper() if "mode" in df.columns and not df.empty else "PAPER"
+pnl_color = "green" if total_pnl >= 0 else "red"
+pnl_sign  = "+" if total_pnl >= 0 else ""
 
-with col4:
-    st.subheader("Order Size Distribution")
-    fig5 = px.histogram(
-        buys,
-        x="size_usdc",
-        nbins=40,
-        color_discrete_sequence=["#F59E0B"],
-        labels={"size_usdc": "Size (USDC)", "count": "Orders"},
-    )
-    fig5.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=260)
-    st.plotly_chart(fig5, use_container_width=True)
+st.markdown(f"""
+<div class="term-header">
+  ▶ POLYMARKET LP BOT &nbsp;|&nbsp; {mode_str} &nbsp;|&nbsp; {now_str}
+</div>
+<div class="stat-grid">
+  <div class="stat-tile">
+    <div class="stat-label">TOTAL TRADES</div>
+    <div class="stat-value blue">{len(buys):,}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">OPEN</div>
+    <div class="stat-value yellow">{len(open_buys):,}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">WON</div>
+    <div class="stat-value green">{len(wins):,}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">LOST</div>
+    <div class="stat-value red">{len(losses):,}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">WIN RATE</div>
+    <div class="stat-value {'green' if len(wins) >= len(losses) else 'red'}">
+      {(len(wins) / (len(wins)+len(losses))*100) if (len(wins)+len(losses)) > 0 else 0:.1f}%
+    </div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">REALISED P&amp;L</div>
+    <div class="stat-value {pnl_color}">{pnl_sign}${total_pnl:.2f}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">OPEN EXPOSURE</div>
+    <div class="stat-value yellow">${open_exposure:.2f}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-label">TOTAL INVESTED</div>
+    <div class="stat-value">${total_invested:.2f}</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-# ── Hourly activity ───────────────────────────────────────────
-st.subheader("Hourly Trade Activity")
-df["hour"] = df["timestamp"].dt.floor("h")
-hourly = df.groupby("hour").agg(
-    trades=("side", "count"),
-    volume=("size_usdc", "sum"),
-).reset_index()
-fig6 = go.Figure()
-fig6.add_bar(x=hourly["hour"], y=hourly["trades"], name="Trades", marker_color="#7C3AED")
-fig6.add_scatter(
-    x=hourly["hour"], y=hourly["volume"],
-    name="Volume (USDC)", yaxis="y2",
-    line=dict(color="#F59E0B", width=2),
-)
-fig6.update_layout(
-    yaxis=dict(title="Trades"),
-    yaxis2=dict(title="Volume (USDC)", overlaying="y", side="right"),
-    legend=dict(orientation="h"),
-    margin=dict(l=0, r=0, t=10, b=0),
-    height=260,
-)
-st.plotly_chart(fig6, use_container_width=True)
+# ── Open Positions ────────────────────────────────────────────
+if not open_buys.empty:
+    rows_html = ""
+    # Aggregate by market+outcome for display
+    grp = open_buys.groupby(["market_id", "question", "outcome", "market_end_ts"]).agg(
+        cost=("size_usdc", "sum"),
+        tokens=("tokens", "sum"),
+        avg_price=("fill_price", "mean"),
+    ).reset_index()
 
-# ── Recent trades table ───────────────────────────────────────
-st.subheader("Recent Trades")
-display_cols = ["timestamp", "side", "outcome", "price", "fill_price", "size_usdc", "tokens", "market_id"]
-available = [c for c in display_cols if c in df.columns]
-recent = df[available].tail(50).sort_values("timestamp", ascending=False)
-recent["market_id"] = recent["market_id"].astype(str).str[:20] + "…"
+    for _, r in grp.sort_values("market_end_ts").iterrows():
+        tl    = fmt_time_left(r["market_end_ts"])
+        tl_cls = time_left_class(r["market_end_ts"])
+        q_str  = short_question(str(r.get("question", "")))
+        rows_html += f"""
+        <tr>
+          <td>{q_str}</td>
+          <td>{outcome_html(r['outcome'])}</td>
+          <td>{r['avg_price']:.4f}</td>
+          <td>${r['cost']:.2f}</td>
+          <td>{r['tokens']:.4f}</td>
+          <td><span class="{tl_cls}">{tl}</span></td>
+        </tr>"""
 
-st.dataframe(
-    recent.style.apply(
-        lambda row: [
-            "background-color: #1e1b4b" if row["side"] == "BUY"
-            else "background-color: #451a03"
-            for _ in row
-        ],
-        axis=1,
-    ),
-    use_container_width=True,
-    height=400,
-)
+    st.markdown(f"""
+    <div class="term-box">
+      <div class="term-box-title">── OPEN POSITIONS ({len(grp)})</div>
+      <table class="term-table">
+        <tr>
+          <th>MARKET</th><th>SIDE</th><th>AVG ENTRY</th>
+          <th>COST</th><th>TOKENS</th><th>TIME LEFT</th>
+        </tr>
+        {rows_html}
+      </table>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <div class="term-box">
+      <div class="term-box-title">── OPEN POSITIONS (0)</div>
+      <span class="dim">No open positions.</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ── Footer / auto-refresh ─────────────────────────────────────
-st.caption(f"Last updated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
+# ── Two-column: Won | Lost ────────────────────────────────────
+col_won, col_lost = st.columns(2)
+
+with col_won:
+    if not wins.empty:
+        rows_html = ""
+        for _, r in wins.tail(30).sort_values("timestamp", ascending=False).iterrows():
+            ts = r["timestamp"].strftime("%H:%M:%S") if hasattr(r["timestamp"], "strftime") else str(r["timestamp"])[:19]
+            q  = short_question(str(r.get("question", "")))
+            rows_html += f"""
+            <tr>
+              <td class="dim">{ts}</td>
+              <td>{outcome_html(r['outcome'])}</td>
+              <td class="dim">{r['price']:.4f}</td>
+              <td class="win">${r['size_usdc']:.2f}</td>
+              <td>{pnl_html(r['pnl_usdc'])}</td>
+            </tr>"""
+        st.markdown(f"""
+        <div class="term-box">
+          <div class="term-box-title">── WON ({len(wins):,}) &nbsp; total=${wins['size_usdc'].sum():.2f}</div>
+          <table class="term-table">
+            <tr><th>TIME</th><th>SIDE</th><th>ENTRY</th><th>PAYOUT</th><th>P&L</th></tr>
+            {rows_html}
+          </table>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="term-box">
+          <div class="term-box-title">── WON (0)</div>
+          <span class="dim">No wins yet.</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+with col_lost:
+    if not losses.empty:
+        rows_html = ""
+        for _, r in losses.tail(30).sort_values("timestamp", ascending=False).iterrows():
+            ts = r["timestamp"].strftime("%H:%M:%S") if hasattr(r["timestamp"], "strftime") else str(r["timestamp"])[:19]
+            q  = short_question(str(r.get("question", "")))
+            rows_html += f"""
+            <tr>
+              <td class="dim">{ts}</td>
+              <td>{outcome_html(r['outcome'])}</td>
+              <td class="dim">{r['price']:.4f}</td>
+              <td class="loss">$0.00</td>
+              <td>{pnl_html(r['pnl_usdc'])}</td>
+            </tr>"""
+        st.markdown(f"""
+        <div class="term-box">
+          <div class="term-box-title">── LOST ({len(losses):,}) &nbsp; total=${losses['pnl_usdc'].abs().sum():.2f} lost</div>
+          <table class="term-table">
+            <tr><th>TIME</th><th>SIDE</th><th>ENTRY</th><th>PAYOUT</th><th>P&L</th></tr>
+            {rows_html}
+          </table>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="term-box">
+          <div class="term-box-title">── LOST (0)</div>
+          <span class="dim">No losses yet.</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ── Trade Log ─────────────────────────────────────────────────
+recent = df.tail(80).sort_values("timestamp", ascending=False)
+rows_html = ""
+for _, r in recent.iterrows():
+    ts    = r["timestamp"].strftime("%H:%M:%S") if hasattr(r["timestamp"], "strftime") else str(r["timestamp"])[:19]
+    q     = short_question(str(r.get("question", "")))
+    price = f"{r['fill_price']:.4f}"
+    size  = f"${r['size_usdc']:.2f}"
+    pnl   = pnl_html(r["pnl_usdc"]) if r["side"] == "SETTLE" else '<span class="dim">—</span>'
+    rows_html += f"""
+    <tr>
+      <td class="dim">{ts}</td>
+      <td>{side_html(r['side'])}</td>
+      <td>{outcome_html(r['outcome'])}</td>
+      <td class="dim">{price}</td>
+      <td>{size}</td>
+      <td>{pnl}</td>
+      <td class="dim" style="font-size:10px">{q}</td>
+    </tr>"""
+
+st.markdown(f"""
+<div class="term-box">
+  <div class="term-box-title">── TRADE LOG (last {len(recent)} of {len(df)})</div>
+  <table class="term-table">
+    <tr>
+      <th>TIME</th><th>TYPE</th><th>SIDE</th>
+      <th>PRICE</th><th>SIZE</th><th>P&L</th><th>MARKET</th>
+    </tr>
+    {rows_html}
+  </table>
+</div>
+<div class="dim" style="font-size:10px; text-align:right; padding: 4px 0;">
+  auto-refresh every {REFRESH_SEC}s &nbsp;|&nbsp; {now_str}
+</div>
+""", unsafe_allow_html=True)
+
+# ── Auto-refresh ──────────────────────────────────────────────
 time.sleep(REFRESH_SEC)
 st.rerun()

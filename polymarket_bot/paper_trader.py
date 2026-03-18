@@ -29,9 +29,12 @@ class FillResult:
     size_usdc: float
     tokens: float
     fill_price: float        # simulated actual fill (slight slippage)
-    side: str                # "BUY" or "SELL"
+    side: str                # "BUY", "SELL", or "SETTLE"
     timestamp: str
     reason: str = ""         # rejection reason if not success
+    question: str = ""       # market question text
+    market_end_ts: float = 0.0  # Unix timestamp when market closes
+    pnl_usdc: float = 0.0    # realised P&L (populated on SETTLE)
 
 
 class PaperTrader:
@@ -62,7 +65,10 @@ class PaperTrader:
         fill_price = self._simulate_fill(intent.price, side="buy")
         tokens     = intent.size_usdc / fill_price if fill_price > 0 else 0.0
 
-        self.risk.record_buy(intent.market_id, intent.outcome, intent.size_usdc, fill_price)
+        self.risk.record_buy(
+            intent.market_id, intent.outcome, intent.size_usdc, fill_price,
+            end_time=intent.end_time, question=intent.question,
+        )
 
         result = FillResult(
             success=True,
@@ -74,6 +80,8 @@ class PaperTrader:
             fill_price=fill_price,
             side="BUY",
             timestamp=_now(),
+            question=intent.question,
+            market_end_ts=intent.end_time or 0.0,
         )
         self._fills.append(result)
         logger.info(
@@ -121,6 +129,44 @@ class PaperTrader:
             price,
             fill_price,
             size_usdc,
+        )
+        return result
+
+    async def settle_position(
+        self,
+        market_id: str,
+        question: str,
+        outcome: str,
+        tokens: float,
+        payout_price: float,  # 1.0 = win, 0.0 = loss
+    ) -> FillResult:
+        """Simulate market settlement when a position resolves."""
+        rec = self.risk.positions.get(market_id, {}).get(outcome)
+        cost_basis = rec.cost_basis_usdc if rec else 0.0
+
+        payout_usdc = tokens * payout_price
+        pnl = payout_usdc - cost_basis
+
+        self.risk.record_sell(market_id, outcome, payout_usdc, payout_price if payout_price > 0 else 1e-9)
+
+        result = FillResult(
+            success=True,
+            market_id=market_id,
+            outcome=outcome,
+            price=cost_basis / tokens if tokens > 0 else 0.0,
+            size_usdc=payout_usdc,
+            tokens=tokens,
+            fill_price=payout_price,
+            side="SETTLE",
+            timestamp=_now(),
+            question=question,
+            pnl_usdc=pnl,
+        )
+        self._fills.append(result)
+        status = "WIN " if payout_price >= 1.0 else "LOSS"
+        logger.info(
+            "[PAPER] SETTLE %s  %-8s  %-50s  payout=$%.2f  pnl=$%+.2f",
+            status, outcome, question[:50], payout_usdc, pnl,
         )
         return result
 

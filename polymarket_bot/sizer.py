@@ -10,6 +10,7 @@ Implements the LP seeding strategy decoded from trades_k9Q2mX4L8A7ZP3R.csv:
 
 import math
 from dataclasses import dataclass
+from typing import Optional
 
 from .config import Config
 from .market_scanner import Market
@@ -25,6 +26,7 @@ class OrderIntent:
     size_usdc:   float        # USDC to spend
     fragment_of: int          # which fragment (1..N)
     total_frags: int
+    end_time:    Optional[float] = None  # Unix timestamp when market closes
 
 
 def compute_raw_size(price: float, cfg: Config) -> float:
@@ -103,6 +105,7 @@ def build_order_intents(
                     size_usdc=round(scaled, 6),
                     fragment_of=1,
                     total_frags=1,
+                    end_time=market.end_time,
                 )
             )
         else:
@@ -116,6 +119,7 @@ def build_order_intents(
                         size_usdc=round(frag_size, 6),
                         fragment_of=i + 1,
                         total_frags=cfg.order_fragments,
+                        end_time=market.end_time,
                     )
                 )
 
