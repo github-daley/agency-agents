@@ -130,7 +130,43 @@ async def main():
     print(f"Markets with vol > $100: {sum(1 for v in vols if v > 100)}")
 
     print("\n" + "=" * 60)
-    print("STEP 3 — Volume field names actually present")
+    print("STEP 3 — BTC/XRP/SOL price-feed markets (any filter level)")
+    print("=" * 60)
+
+    COIN_TERMS = ["bitcoin", "btc", "xrp", "ripple", "solana", "sol"]
+    TF_TERMS   = ["5 min", "5min", "15 min", "15min", "1 hour", "1hr",
+                  "60 min", "hourly", "daily", "will btc", "will xrp", "will sol",
+                  "price", "above", "below", "reach", "hit $", "end above", "end below"]
+
+    coin_matches = []
+    for m in all_markets:
+        q = (m.get("question") or "").lower()
+        if any(t in q for t in COIN_TERMS):
+            coin_matches.append(m)
+
+    print(f"Markets mentioning BTC/XRP/SOL: {len(coin_matches)}")
+
+    tf_matches = [
+        m for m in coin_matches
+        if any(t in (m.get("question") or "").lower() for t in TF_TERMS)
+    ]
+    print(f"  ...also mentioning price/time:  {len(tf_matches)}")
+
+    if coin_matches:
+        print("\nAll crypto-related market questions (no filter):")
+        for m in coin_matches[:30]:
+            vol  = float(m.get("volumeNum") or m.get("volume") or 0)
+            sprd = m.get("spread", "?")
+            yes  = float((parse_prices(m.get("outcomePrices", [])) or [0])[0])
+            print(f"  [{vol:>12,.0f} vol | sprd={sprd} | yes={yes:.2f}] {m.get('question', '')}")
+    else:
+        print("\nNO crypto markets found in this batch of 100.")
+        print("This means BTC/XRP/SOL price-feed markets are NOT available on")
+        print("Polymarket right now, or are outside the top-100 active markets.")
+        print("\nTIP: Set MARKET_KEYWORDS= in your .env to trade all 44 qualifying markets.")
+
+    print("\n" + "=" * 60)
+    print("STEP 4 — Volume field names actually present")
     print("=" * 60)
     vol_fields = ["volume", "volumeNum", "volume24hr", "volumeClob", "usdcSize"]
     for field in vol_fields:
