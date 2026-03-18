@@ -819,7 +819,7 @@ function renderTradesTable(){
                   t.result==='loss'?'<span class="badge b-loss">LOSS</span>':
                   '<span class="badge b-open">OPEN</span>';
     const pnlStr=t.pnl&&t.result?
-      `<span style="color:${t.result==='win'?'var(--grn)':'var(--red)'}">${t.result==='win'?'+':''}\$${Math.abs(t.pnl).toFixed(2)}</span>`
+      `<span style="color:${t.result==='win'?'var(--grn)':'var(--red)'}">${t.result==='win'?'+':''}$${Math.abs(t.pnl).toFixed(2)}</span>`
       :'<span style="color:var(--tx3)">—</span>';
     return `<tr>
       <td style="color:var(--tx3)">${t.time}</td>
