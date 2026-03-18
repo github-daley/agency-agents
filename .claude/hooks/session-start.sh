@@ -56,4 +56,22 @@ Then follow scripts/daily-agency-run.md — start with Phase 0 (Intelligence Swe
 Phase 0 runs 3 Trend Researcher agents in parallel before anything else.
 EOF
 
+# Inject Figma token from repo secret into local MCP settings (never committed)
+SETTINGS_LOCAL="$CLAUDE_PROJECT_DIR/.claude/settings.local.json"
+if [ -n "${CLAUDE:-}" ]; then
+  cat > "$SETTINGS_LOCAL" << SETTINGS
+{
+  "mcpServers": {
+    "figma-remote-mcp": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CLAUDE}"
+      }
+    }
+  }
+}
+SETTINGS
+fi
+
 echo "Agency session started for $TODAY. Context written to $EXEC_DIR/SESSION-CONTEXT.md"
