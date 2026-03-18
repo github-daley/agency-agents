@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "figma": {
+    "figma-remote-mcp": {
       "type": "http",
       "url": "https://mcp.figma.com/mcp"
     }

@@ -74,6 +74,63 @@ Before producing any visual, social media template, image brief, design spec, or
 
 ---
 
+## Figma MCP Integration
+
+### MCP Server Configuration
+
+The Figma remote MCP server is configured in `.mcp.json` at the project root:
+
+```json
+{
+  "mcpServers": {
+    "figma-remote-mcp": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
+    }
+  }
+}
+```
+
+### Authentication
+
+Figma MCP uses OAuth — no API keys needed. Per session:
+1. Run `/mcp` in Claude Code
+2. Select `figma-remote-mcp`
+3. Authenticate via browser
+4. Authorization persists for the session
+
+### Available Figma MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `get_design_context` | Primary tool — fetch component code, screenshot, and hints from a Figma node |
+| `get_screenshot` | Capture visual screenshot of a Figma node |
+| `get_metadata` | Fetch file/node metadata |
+| `get_variable_defs` | Fetch design token variables from Figma |
+| `get_code_connect_map` | View Code Connect mappings |
+| `add_code_connect_map` | Add a Figma component → codebase component mapping |
+| `send_code_connect_mappings` | Push Code Connect mappings to Figma |
+| `generate_diagram` | Create diagrams in FigJam |
+| `create_design_system_rules` | Analyze codebase and generate design system rules |
+
+### Figma URL Parsing
+
+Extract `fileKey` and `nodeId` from Figma URLs:
+
+```
+figma.com/design/:fileKey/:fileName?node-id=:nodeId
+```
+
+- Convert `-` to `:` in `nodeId` (e.g., `123-456` → `123:456`)
+- For FigJam boards: `figma.com/board/:fileKey/` → use `get_figjam`
+- When a Figma URL is provided, always call `get_design_context` first
+
+### Media Production Standard
+
+**The canonical format for all Figma-produced media is the MNO pitch deck** (`assets/Telcoin Network Introduction – MNO - Mar 2026 (1).pdf`). Every deck, one-pager, or partner brief must follow this structure and visual language. See `design/design-figma-media-producer.md` for the full agent spec.
+
+---
+
 ## Directory Map
 
 ```
@@ -115,6 +172,7 @@ Use the Agent tool with these subagent types for specific tasks:
 | Community replies, support messaging | `Support Responder` |
 | Data analysis, performance metrics | `Analytics Reporter` |
 | Developer-facing content, docs | `Technical Writer` |
+| **DESIGN — Figma pitch decks, partner briefs, one-pagers** | `Figma Media Producer` |
 | **DESIGN — visual narrative, storyboards, video direction** | `Visual Storyteller` |
 | **DESIGN — AI image prompts (Midjourney/DALL-E/Flux)** | `Image Prompt Engineer` |
 | **DESIGN — human-featuring images (representation-safe)** | `Inclusive Visuals Specialist` |
@@ -197,6 +255,65 @@ Use the Agent tool with these subagent types for specific tasks:
 **Content OS reference**: `strategy/CONTENT-OS.md`
 
 **Standing instruction**: After each council call recap is shared, update `TELCOIN-RESEARCH.md` first, then flag what campaign content it unlocks.
+
+---
+
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately - don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
+
+### 3. Self-Improvement Loop
+- After ANY correction from the user: update `tasks/lessons.md` with the pattern
+- Write rules for yourself that prevent the same mistake
+- Ruthlessly iterate on these lessons until mistake rate drops
+- Review lessons at session start for relevant project
+
+### 4. Verification Before Done
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+
+### 5. Demand Elegance (Balanced)
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes - don't over-engineer
+- Challenge your own work before presenting it
+
+### 6. Autonomous Bug Fixes
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Point at logs, errors, failing tests - then resolve them
+- Zero context switching required from the user
+- Fix failing tests without being told how
+
+---
+
+## Task Management
+
+1. **Plan First**: Write plan to `tasks/todo.md` with checkable items
+2. **Verify Plan**: Check in before starting implementation
+3. **Track Progress**: Mark items complete as you go
+4. **Explain Changes**: High-level summary at each step
+5. **Document Results**: Add review section to `tasks/todo.md`
+6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
+
+---
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
 
 ---
 

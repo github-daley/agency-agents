@@ -98,3 +98,37 @@ The `claude mcp list` CLI command is **not available** when run from inside a ho
 - Review/agent work branch (from GitHub task runner): `claude/review-codebase-agents-iLgt5`
 - **Never mix** — campaign content goes to `campaign-iLgt5`, automated reviews go to their own branch
 
+
+---
+
+## Figma MCP — generate_diagram Capability & Limits
+
+**Date**: March 17, 2026
+
+### What generate_diagram does
+- Creates FigJam (whiteboard) artifacts using Mermaid syntax
+- Supports custom node styling via `classDef` — colors, fills, fonts, stroke
+- Output is a real Figma file (FigJam board) accessible via URL
+- Good for: flowcharts, status trackers, comparison diagrams, network diagrams
+- Color support: full hex color in `fill:`, `stroke:`, `color:` — use Telcoin brand colors
+
+### What it cannot do
+- Cannot create Figma Design frames (the pixel-perfect static card tool)
+- Cannot produce 1200×675 tweet card images directly
+- The HTML card approach (`design/output/*.html`) remains the correct path for tweet card mockups
+
+### Campaign infographics built in FigJam (March 17, 2026)
+Four Telcoin content infographics created via Figma MCP for the @telcoinTAO campaign:
+
+1. **Mainnet Readiness Status Tracker** — COMPLETE/IN PROGRESS/QUEUED milestone chain → mainnet launch
+2. **eUSD & U.S. CBDC Policy** — Senate CBDC ban flowchart showing eUSD's carve-out position
+3. **GSMA Stablecoin Framework** — Co-authorship and MNO validator model network diagram
+4. **eUSD vs. Reserve-Backed Stablecoins** — Regulatory category distinction (eUSD vs. USDC)
+
+### Best practice for campaign visuals
+- FigJam diagrams: use for informational/explanatory infographics embedded in tweet threads
+- HTML cards: use for tweet header cards (1200×675, brand-accurate, screenshot → Figma)
+- Both approaches complement each other — diagrams for content, HTML for card format
+
+### Wrong branch risk
+The GitHub task runner creates its own claude/* branch. When starting a session, always verify `git branch` shows `claude/campaign-iLgt5` before committing. See Git Branching section above.
