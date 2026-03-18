@@ -29,7 +29,7 @@ from fastapi.responses import HTMLResponse, Response
 
 LOG_FILE   = os.environ.get("BOT_TRADES_CSV", "bot_trades.csv")
 HOST       = os.environ.get("DASHBOARD_HOST", "0.0.0.0")
-PORT       = int(os.environ.get("DASHBOARD_PORT", "8002"))
+PORT       = int(os.environ.get("DASHBOARD_PORT", "8003"))
 REFRESH_MS = 3000
 
 @asynccontextmanager
