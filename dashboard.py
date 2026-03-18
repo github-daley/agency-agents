@@ -23,15 +23,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import uvicorn
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, Response
 
 LOG_FILE   = os.environ.get("BOT_TRADES_CSV", "bot_trades.csv")
 HOST       = os.environ.get("DASHBOARD_HOST", "0.0.0.0")
-PORT       = int(os.environ.get("DASHBOARD_PORT", "8001"))
+PORT       = int(os.environ.get("DASHBOARD_PORT", "8002"))
 REFRESH_MS = 3000
 
-app     = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(broadcaster())
+    yield
+
+app     = FastAPI(lifespan=lifespan)
 clients: list[WebSocket] = []
 
 
@@ -240,11 +246,6 @@ async def broadcaster():
         for ws in dead:
             if ws in clients:
                 clients.remove(ws)
-
-
-@app.on_event("startup")
-async def startup():
-    asyncio.create_task(broadcaster())
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
