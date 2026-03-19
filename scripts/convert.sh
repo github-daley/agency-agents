@@ -104,6 +104,26 @@ slugify() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//'
 }
 
+escape_yaml_double_quotes() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+translate_codex_name() {
+  local name="$1"
+  local map_file="$REPO_ROOT/integrations/codex/name-map.tsv"
+  local translated=""
+
+  if [[ -f "$map_file" ]]; then
+    translated="$(awk -F '\t' -v key="$name" '$1 == key { print $2; exit }' "$map_file")"
+  fi
+
+  if [[ -n "$translated" ]]; then
+    printf '%s\n' "$translated"
+  else
+    printf '%s\n' "$name"
+  fi
+}
+
 # --- Per-tool converters ---
 
 convert_antigravity() {
@@ -157,12 +177,17 @@ HEREDOC
 
 convert_codex() {
   local file="$1"
-  local name description slug outdir outfile body
+  local name description localized_name localized_description slug outdir outfile body
+  local yaml_name yaml_description
 
   name="$(get_field "name" "$file")"
   description="$(get_field "description" "$file")"
+  localized_name="$(translate_codex_name "$name")"
+  localized_description="The Agency 中文技能：${localized_name}。原始角色名：${name}。详细指令保留在英文正文中。"
   slug="$(slugify "$name")"
   body="$(get_body "$file")"
+  yaml_name="$(escape_yaml_double_quotes "$localized_name")"
+  yaml_description="$(escape_yaml_double_quotes "$localized_description")"
 
   outdir="$OUT_DIR/codex/skills/$slug"
   outfile="$outdir/SKILL.md"
@@ -171,8 +196,8 @@ convert_codex() {
   # Codex custom skill format: folder-based skill with a SKILL.md file.
   cat > "$outfile" <<HEREDOC
 ---
-name: ${slug}
-description: ${description}
+name: "${yaml_name}"
+description: "${yaml_description}"
 ---
 ${body}
 HEREDOC

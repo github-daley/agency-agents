@@ -2,6 +2,8 @@
 
 Packages Agency agents as Codex custom skills. Each agent becomes a folder-based
 skill stored as `SKILL.md` in `~/.codex/skills/<slug>/`.
+Generated Codex skills use Chinese-localized `name` and `description` fields
+for display, while preserving the original English skill body for behavior.
 
 ## Install
 
