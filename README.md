@@ -44,7 +44,7 @@ Each agent file contains:
 
 Browse the agents below and copy/adapt the ones you need!
 
-### Option 3: Use with Other Tools (Cursor, Aider, Windsurf, Gemini CLI, OpenCode)
+### Option 3: Use with Other Tools (Cursor, Codex, Aider, Windsurf, Gemini CLI, OpenCode)
 
 ```bash
 # Step 1 -- generate integration files for all supported tools
@@ -55,6 +55,7 @@ Browse the agents below and copy/adapt the ones you need!
 
 # Or target a specific tool directly
 ./scripts/install.sh --tool cursor
+./scripts/install.sh --tool codex
 ./scripts/install.sh --tool copilot
 ./scripts/install.sh --tool aider
 ./scripts/install.sh --tool windsurf
@@ -509,6 +510,7 @@ The Agency works natively with Claude Code, and ships conversion + install scrip
 - **[GitHub Copilot](https://github.com/copilot)** — native `.md` agents, no conversion needed → `~/.github/agents/` + `~/.copilot/agents/`
 - **[Antigravity](https://github.com/google-gemini/antigravity)** — `SKILL.md` per agent → `~/.gemini/antigravity/skills/`
 - **[Gemini CLI](https://github.com/google-gemini/gemini-cli)** — extension + `SKILL.md` files → `~/.gemini/extensions/agency-agents/`
+- **[Codex](https://developers.openai.com/codex/skills)** — `SKILL.md` per agent → `~/.codex/skills/`
 - **[OpenCode](https://opencode.ai)** — `.md` agent files → `.opencode/agents/`
 - **[Cursor](https://cursor.sh)** — `.mdc` rule files → `.cursor/rules/`
 - **[Aider](https://aider.chat)** — single `CONVENTIONS.md` → `./CONVENTIONS.md`
@@ -545,20 +547,22 @@ The installer scans your system for installed tools, shows a checkbox UI, and le
   [x]  2)  [*]  Copilot         (~/.github + ~/.copilot)
   [x]  3)  [*]  Antigravity     (~/.gemini/antigravity)
   [ ]  4)  [ ]  Gemini CLI      (gemini extension)
-  [ ]  5)  [ ]  OpenCode        (opencode.ai)
-  [ ]  6)  [ ]  OpenClaw        (~/.openclaw)
-  [x]  7)  [*]  Cursor          (.cursor/rules)
-  [ ]  8)  [ ]  Aider           (CONVENTIONS.md)
-  [ ]  9)  [ ]  Windsurf        (.windsurfrules)
-  [ ] 10)  [ ]  Qwen Code       (~/.qwen/agents)
+  [x]  5)  [*]  Codex           (~/.codex/skills)
+  [ ]  6)  [ ]  OpenCode        (opencode.ai)
+  [ ]  7)  [ ]  OpenClaw        (~/.openclaw)
+  [x]  8)  [*]  Cursor          (.cursor/rules)
+  [ ]  9)  [ ]  Aider           (CONVENTIONS.md)
+  [ ] 10)  [ ]  Windsurf        (.windsurfrules)
+  [ ] 11)  [ ]  Qwen Code       (~/.qwen/agents)
 
-  [1-10] toggle   [a] all   [n] none   [d] detected
+  [1-11] toggle   [a] all   [n] none   [d] detected
   [Enter] install   [q] quit
 ```
 
 **Or install a specific tool directly:**
 ```bash
 ./scripts/install.sh --tool cursor
+./scripts/install.sh --tool codex
 ./scripts/install.sh --tool opencode
 ./scripts/install.sh --tool openclaw
 ./scripts/install.sh --tool antigravity
@@ -646,6 +650,27 @@ On a fresh clone, generate the Gemini extension files before running the install
 ```
 
 See [integrations/gemini-cli/README.md](integrations/gemini-cli/README.md) for details.
+</details>
+
+<details>
+<summary><strong>Codex</strong></summary>
+
+Each agent becomes a Codex skill in `~/.codex/skills/<slug>/SKILL.md`.
+On a fresh clone, generate the Codex skill files before running the installer.
+
+```bash
+./scripts/convert.sh --tool codex
+./scripts/install.sh --tool codex
+```
+
+Restart Codex after installation so it picks up the new skills.
+
+Then reference a skill naturally in Codex:
+```
+Use the frontend-developer skill to review this component.
+```
+
+See [integrations/codex/README.md](integrations/codex/README.md) for details.
 </details>
 
 <details>
