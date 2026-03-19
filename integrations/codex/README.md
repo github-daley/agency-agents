@@ -22,11 +22,11 @@ Restart Codex after installing new skills so it picks them up.
 In Codex, reference a skill naturally in your prompt:
 
 ```
-Use the frontend-developer skill to review this React component.
+Use the "前端开发工程师" skill to review this React component.
 ```
 
 ```
-Use the reality-checker skill and tell me if this feature is production-ready.
+Use the "现实检验官" skill and tell me if this feature is production-ready.
 ```
 
 Codex can also auto-trigger a skill when your request clearly matches the
@@ -50,8 +50,8 @@ Agency agent instructions:
 
 ```yaml
 ---
-name: frontend-developer
-description: Expert frontend developer specializing in modern web technologies...
+name: "前端开发工程师"
+description: "The Agency 中文技能：前端开发工程师。原始角色名：Frontend Developer。详细指令保留在英文正文中。"
 ---
 ```
 
